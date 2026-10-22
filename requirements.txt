@@ -1,0 +1,23 @@
+# requirements.txt — Dependencias comunes (Arduino UNO Q y cualquier Linux).
+# NO incluye gpiozero/lgpio: en la UNO Q el header lo controla el MCU y
+# dispenser.py importa gpiozero de forma perezosa. Para Raspberry Pi usar
+# requirements-pi.txt.
+fastapi>=0.110
+uvicorn>=0.29
+jinja2>=3.1
+solders>=0.21
+# I-009: el namespace `spl` (spl.token.constants, spl.token.instructions)
+# se distribuye EMPAQUETADO dentro del paquete `solana` >=0.40 (ver RECORD de
+# solana-0.40.x: spl/token/...). NO existe un paquete PyPI legítimo llamado
+# `spl-token` (404 en PyPI) y `spl-token-py` es MALICIOSO (exfiltra keys).
+# Por eso se fija solana>=0.40 para garantizar `import spl.token` en
+# instalaciones limpias; no añadir ningún paquete "spl-*" externo.
+solana>=0.40
+qrcode>=7.4
+pillow>=10.0
+pydantic>=2.0
+base58>=2.1
+python-dotenv>=1.0
+httpx>=0.27
+websockets>=10.4
+PyYAML>=6.0

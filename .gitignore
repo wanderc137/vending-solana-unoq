@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.keypair.json
+wallet.json
+*.key
+id.json
+.DS_Store
+*.log
+PLAN.md
+AUDIT_REPORT.md
+NOTAS_RETOMAR.md
+DESIGN.md
+.lgd-nfy0
+config.devnet.yaml.bak
+# Ruedas descargadas para instalar en la UNO Q (no se versionan).
+wheels/
+*.whl
+
+# Wallet temporal del test E2E (nunca versionar).
+wallet_test.json
