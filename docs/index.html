@@ -257,8 +257,7 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
   .foot-grid{grid-template-columns:1fr}
   .section{padding:72px 0}
 }
-</style>
-<link rel="stylesheet" href="assets/community.css?v=3"></head>
+</style><link rel="stylesheet" href="assets/community.css?v=5"></head>
 <body style="--accent:#14F195;--accent2:#9945FF">
 <div class="grid-overlay"></div>
 <div class="glow one"></div>
@@ -457,7 +456,9 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 })();
 </script>
 
+
+
 <script>window.PORTFOLIO_COMMUNITY = {"account": "wanderc137", "repo": "vending-solana-unoq", "coinNamespace": "wanderc137-vending-solana-unoq-coins-v2", "faqs": [{"q": "¿Qué hace exactamente este proyecto?", "a": "Es una máquina expendedora que cobra <b>USDC en Solana</b>. El cliente escanea un QR de Solana Pay, el backend detecta la transferencia y el MCU de la Arduino UNO Q activa un relé en <code>D7</code> durante 2,5 s para dispensar el producto."}, {"q": "¿Dónde está la clave privada de la billetera?", "a": "No está en la placa. El sistema solo necesita la <b>dirección pública</b> del comercio para construir el Transfer Request. La clave privada nunca se carga en el repositorio ni en el dispositivo; el modelo de confianza está explicado en <code>docs/datasheet.md</code>."}, {"q": "¿Funciona en mainnet o solo en devnet?", "a": "Está probado con <b>pagos reales en mainnet-beta</b>: tres pagos validados. El E2E en devnet no se ejecutó porque la unidad tuvo un fallo de hardware en el WiFi y el faucet estaba agotado. El README declara esa parte incómoda en lugar de taparla."}, {"q": "¿Qué pasa si se cae internet o el RPC?", "a": "Sin red no se pueden confirmar pagos. El servicio sigue activo y el relé <b>no se dispara</b> por una orden no confirmada. La unidad de prueba tuvo el WiFi en RMA; por eso el proyecto separa la lógica de pago de la de dispensado y documenta el riesgo residual."}, {"q": "¿Cómo se conecta el relé?", "a": "El relé va al pin <code>D7</code> del header de la UNO Q y lo gobierna el <b>MCU STM32U585</b>, no Linux. El Linux habla con el MCU por <code>arduino-router</code> en <code>127.0.0.1:7500</code>; el pulso se ejecuta en el MCU para evitar jitter."}, {"q": "¿Puedo cambiar productos y precios?", "a": "Sí. El catálogo vive en <code>catalog.yaml</code> y cada producto tiene id, nombre, precio y tiempo de pulso. La interfaz y el backend leen ese archivo; no hay que recompilar el firmware para cambiar el catálogo."}, {"q": "¿Por qué Arduino UNO Q y no una Raspberry Pi?", "a": "Porque separa Linux y MCU: el MPU corre FastAPI y el monitor de pagos; el STM32U585 ejecuta el pulso del relé con timing determinista. Una Raspberry Pi sola puede hacerlo, pero el aislamiento y el control de tiempo son mejores con un MCU dedicado."}, {"q": "¿Cómo se prueba sin armar la máquina?", "a": "Hay un modo simulado que crea una orden, simula el pago y ejecuta el pulso real en <code>D7</code>. También se puede usar el catálogo y la UI sin conectar la billetera; el README explica qué queda cubierto y qué no."}, {"q": "¿Cómo colaboro o reporto un problema?", "a": "Abrí un issue en el repositorio con el contexto mínimo para reproducirlo. Si encontrás un fallo de seguridad, evitá publicar credenciales o datos sensibles en el hilo."}]};</script>
-<script src="assets/community.js?v=3" defer></script>
+<script src="assets/community.js?v=5" defer></script>
 </body>
 </html>
