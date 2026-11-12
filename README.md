@@ -637,13 +637,12 @@ Solo cifras medidas. Lo no medido se declara como objetivo.
 
 ## 17. Comunidad y reconocimiento
 
-La página del proyecto incluye una sección de comunidad con tres piezas:
+La página del proyecto incluye una sección de comunidad con dos piezas:
 
 - **FAQ específica** del vending: clave privada, mainnet/devnet, relé, catálogo, WiFi en RMA y pruebas.
-- **Preguntas**: un formulario que envía la consulta por correo a `wander.c137@protonmail.com`, sin cuenta de GitHub y con nombre o pseudónimo opcional. También incluye un enlace opcional para publicarla en Discussions si la persona prefiere que quede pública.
-- **Monedas anónimas**: un contador global sin usuario asociado, implementado con [Abacus](https://abacus.jasoncameron.dev/). No usa Issues porque un issue siempre queda vinculado a una cuenta; el contador no guarda identidad. Se pueden regalar varias monedas, con un bloqueo breve entre clics para evitar dobles envíos.
+- **Monedas anónimas**: un contador global sin usuario asociado, implementado con [Abacus](https://abacus.jasoncameron.dev/). No usa Issues porque un issue siempre queda vinculado a una cuenta; el contador no guarda identidad. Se pueden regalar varias monedas, con un bloqueo breve entre clics para evitar dobles envíos. El valor persiste en el servicio externo y no se guarda ni se reinicia en el navegador.
 
-El correo se abre en el cliente de la persona visitante; no se publica ni se comparte con GitHub. Para un envío totalmente automático sin cliente de correo haría falta un backend pequeño (por ejemplo, un Worker con un proveedor de email) con su token del lado servidor.
+El formulario de preguntas se retiró: GitHub Pages es estático y no puede enviar un correo ni crear una discusión sin abrir otra aplicación o pedir inicio de sesión. Para consultas nuevas, el repositorio mantiene sus issues.
 
 ---
 

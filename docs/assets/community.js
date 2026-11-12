@@ -1,40 +1,17 @@
-/* Comunidad del proyecto: FAQ, preguntas por correo y monedas anónimas. */
+/* Comunidad del proyecto: FAQ y monedas anónimas. */
 (() => {
   "use strict";
 
   const CFG = window.PORTFOLIO_COMMUNITY || {};
   const account = CFG.account || "wanderc137";
   const repo = CFG.repo || location.pathname.split("/").filter(Boolean)[0] || "proyecto";
-  const category = CFG.discussionCategory || "q-a";
   const coinNamespace = CFG.coinNamespace || `${account}-${repo}`;
   const coinApi = (CFG.coinApi || "https://abacus.jasoncameron.dev").replace(/\/$/, "");
   const faqs = Array.isArray(CFG.faqs) ? CFG.faqs : [];
-  const contactEmail = CFG.contactEmail || "wander.c137@protonmail.com";
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
   }[c]));
-
-  const questionText = (name, question) => [
-    `Pregunta de: ${name || "Anónimo"}`,
-    "",
-    question.trim(),
-    "",
-    "---",
-    `Enviada desde ${location.origin}${location.pathname}`,
-  ].join("\n");
-
-  const mailtoUrl = (name, question) => {
-    const subject = `Pregunta anónima · ${repo}`;
-    return `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(questionText(name, question))}`;
-  };
-
-  const discussionUrl = (name, question) => {
-    const clean = question.trim().replace(/\r/g, "");
-    const title = clean.replace(/\s+/g, " ").slice(0, 92);
-    const body = questionText(name, clean);
-    return `https://github.com/${account}/${repo}/discussions/new?category=${encodeURIComponent(category)}&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-  };
 
   const faqHtml = faqs.map((item, index) => `
     <details class="psc-faq-item"${index === 0 ? " open" : ""}>
@@ -53,41 +30,14 @@
       <div class="psc-head">
         <div class="psc-kicker">Comunidad · ${esc(repo)}</div>
         <h2>Preguntas reales.<br><span class="psc-grad">Reconocimiento anónimo.</span></h2>
-        <p>Lo que más se pregunta sobre este proyecto, un canal para dejar tu pregunta y una moneda simbólica que no queda atada a tu cuenta.</p>
+        <p>Lo que más se pregunta sobre este proyecto y una moneda simbólica que no queda atada a tu cuenta.</p>
       </div>
 
       <div class="psc-faq" aria-label="Preguntas frecuentes">
         ${faqHtml}
       </div>
 
-      <div class="psc-grid">
-        <div class="psc-card">
-          <h3>Dejá tu pregunta</h3>
-          <p class="psc-sub">Se envía por correo a <strong>${esc(contactEmail)}</strong>. No hace falta cuenta de GitHub: podés firmar con un pseudónimo o dejar el nombre vacío.</p>
-          <form id="psc-form" novalidate>
-            <div class="psc-field">
-              <label for="psc-name">Nombre o pseudónimo <span>opcional</span></label>
-              <input id="psc-name" name="name" type="text" maxlength="60" placeholder="¿Cómo querés firmar?" autocomplete="nickname">
-            </div>
-            <div class="psc-field">
-              <label for="psc-question">Tu pregunta <span>obligatoria</span></label>
-              <textarea id="psc-question" name="question" maxlength="1200" required placeholder="¿Cómo se valida el pago antes de dispensar? ¿Qué pasa si el RPC no responde?"></textarea>
-            </div>
-            <div class="psc-form-foot">
-              <span class="psc-count" id="psc-count">0 / 1200</span>
-              <div class="psc-actions">
-                <button class="psc-btn" type="button" id="psc-copy">Copiar</button>
-                <button class="psc-btn" type="button" id="psc-clear">Limpiar</button>
-                <button class="psc-btn primary" type="submit" id="psc-send">Enviar pregunta
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </button>
-              </div>
-            </div>
-            <p class="psc-status" id="psc-status" role="status" aria-live="polite"></p>
-            <p class="psc-note">Por defecto no se publica en GitHub: va por correo. Si preferís que quede pública, <a href="https://github.com/${account}/${repo}/discussions" target="_blank" rel="noopener">publicala en GitHub Discussions</a>.</p>
-          </form>
-        </div>
-
+      <div class="psc-coin-wrap">
         <aside class="psc-card psc-coin" aria-labelledby="psc-coin-title">
           <div class="psc-coin-top">
             <div class="psc-coin-icon" aria-hidden="true">
@@ -113,67 +63,9 @@
   else if (main) main.appendChild(section);
   else document.body.appendChild(section);
 
-  const form = section.querySelector("#psc-form");
-  const nameInput = section.querySelector("#psc-name");
-  const questionInput = section.querySelector("#psc-question");
-  const count = section.querySelector("#psc-count");
-  const status = section.querySelector("#psc-status");
-  const clear = section.querySelector("#psc-clear");
-  const copy = section.querySelector("#psc-copy");
-  const send = section.querySelector("#psc-send");
   const coinCount = section.querySelector("#psc-coin-count");
   const coinBtn = section.querySelector("#psc-coin-btn");
   const coinMsg = section.querySelector("#psc-coin-msg");
-
-  const setStatus = (text, kind = "") => {
-    status.textContent = text;
-    status.className = `psc-status${kind ? ` ${kind}` : ""}`;
-  };
-
-  const updateCount = () => {
-    count.textContent = `${questionInput.value.length} / 1200`;
-  };
-
-  questionInput.addEventListener("input", updateCount);
-  updateCount();
-
-  clear.addEventListener("click", () => {
-    nameInput.value = "";
-    questionInput.value = "";
-    updateCount();
-    setStatus("");
-    questionInput.focus();
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const question = questionInput.value.trim();
-    const name = nameInput.value.trim();
-    if (question.length < 8) {
-      setStatus("Escribí una pregunta un poco más completa (mínimo 8 caracteres).", "bad");
-      questionInput.focus();
-      return;
-    }
-    const url = mailtoUrl(name, question);
-    window.location.href = url;
-    setStatus(`Abrimos tu cliente de correo con la pregunta. Revisala y enviála a ${contactEmail}. Si no se abrió, usá «Copiar».`, "ok");
-  });
-
-  copy.addEventListener("click", async () => {
-    const question = questionInput.value.trim();
-    if (question.length < 8) {
-      setStatus("Escribí una pregunta un poco más completa (mínimo 8 caracteres).", "bad");
-      questionInput.focus();
-      return;
-    }
-    const text = `${questionText(nameInput.value.trim(), question)}\n\nPara: ${contactEmail}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setStatus("Pregunta copiada. Pegala en un correo a " + contactEmail + ".", "ok");
-    } catch {
-      setStatus("No se pudo copiar automáticamente. Seleccioná el texto y copialo a mano.", "bad");
-    }
-  });
 
   const setCoinMessage = (text, kind = "") => {
     coinMsg.textContent = text;
