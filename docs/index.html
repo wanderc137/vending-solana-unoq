@@ -21,7 +21,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scrollbar-color:#2a3448 #05070c;scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#05070c}
+::-webkit-scrollbar-thumb{background:#2a3448;border-radius:999px;border:2px solid #05070c}
+::-webkit-scrollbar-thumb:hover{background:#3a4a66}
 body{
   margin:0;background:#05070c;color:#e8edf6;
   font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
