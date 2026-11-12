@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 900" width="1240" height="900" role="img" aria-labelledby="title desc">
+  <title id="title">Arquitectura de Vending Solana USDC sobre Arduino UNO Q</title>
+  <desc id="desc">Diagrama de componentes: cliente, MPU Linux con FastAPI, monitor Solana, puente TCP al MCU, relé y LEDs de placa.</desc>
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7f8aa3"/>
+    </marker>
+    <marker id="arw-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#14f195"/>
+    </marker>
+    <marker id="arw-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b57bff"/>
+    </marker>
+    <style>
+      .t { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+      .h1 { font-size: 25px; font-weight: 700; fill: #f2f2f7; }
+      .sub { font-size: 13.5px; fill: #9a9ab0; }
+      .zone { font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+      .mod { font-size: 14.5px; font-weight: 700; fill: #f2f2f7; }
+      .small { font-size: 11.5px; fill: #9a9ab0; }
+      .tiny { font-size: 10.5px; fill: #7f8aa3; }
+      .link { stroke: #7f8aa3; stroke-width: 1.6; fill: none; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1240" height="900" fill="#07070b"/>
+  <text class="t h1" x="44" y="54">Arquitectura — Vending USDC sobre Arduino UNO Q</text>
+  <text class="t sub" x="44" y="82">MPU Linux (Debian 13.2) + MCU STM32U585 · módulos, responsabilidades y protocolos</text>
+
+  <!-- Cliente -->
+  <rect x="40" y="120" width="250" height="180" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="60" y="148" fill="#5aa9ff">CLIENTE</text>
+  <text class="t mod" x="60" y="180">Phantom / wallet</text>
+  <text class="t small" x="60" y="202">Escanea el QR y firma</text>
+  <text class="t mod" x="60" y="238">Navegador del kiosco</text>
+  <text class="t small" x="60" y="260">Carrito · polling cada 1,5 s</text>
+
+  <line class="link" x1="290" y1="210" x2="374" y2="210" marker-end="url(#arw)"/>
+  <text class="t tiny" x="296" y="196">HTTP :8000</text>
+  <text class="t tiny" x="296" y="232">HTML · JSON</text>
+
+  <!-- MPU -->
+  <rect x="380" y="120" width="470" height="570" rx="16" fill="#0d0d15" stroke="#2b3b36"/>
+  <text class="t zone" x="400" y="148" fill="#14f195">MPU · LINUX</text>
+  <text class="t small" x="400" y="170">Qualcomm QCM2290 · Debian 13.2 · Python 3.13.5 · aarch64</text>
+
+  <rect x="400" y="200" width="210" height="72" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="416" y="228">app.py</text>
+  <text class="t small" x="416" y="248">FastAPI · órdenes · QR</text>
+
+  <rect x="622" y="200" width="208" height="72" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="638" y="228">payments.py</text>
+  <text class="t small" x="638" y="248">monitor WS · validación</text>
+
+  <rect x="400" y="292" width="120" height="58" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="414" y="316">config.py</text>
+  <text class="t small" x="414" y="334">env &gt; .env &gt; YAML</text>
+
+  <rect x="532" y="292" width="130" height="58" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="546" y="316">wallet.py</text>
+  <text class="t small" x="546" y="334">pubkey-only · ATA</text>
+
+  <rect x="674" y="292" width="156" height="58" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="688" y="316">dispenser.py</text>
+  <text class="t small" x="688" y="334">auto | unoq | stub</text>
+
+  <rect x="400" y="372" width="140" height="58" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="414" y="396">mcu.py</text>
+  <text class="t small" x="414" y="414">TCP :7500 · ~70 ms</text>
+
+  <rect x="552" y="372" width="150" height="58" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="566" y="396">unoq_leds.py</text>
+  <text class="t small" x="566" y="414">sysfs · 3 LEDs</text>
+
+  <rect x="400" y="452" width="210" height="60" rx="10" fill="#111b18" stroke="#1f5f4a"/>
+  <text class="t mod" x="414" y="476">arduino-router</text>
+  <text class="t small" x="414" y="496">monitor TCP :7500 · systemd</text>
+
+  <rect x="622" y="452" width="208" height="60" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="636" y="476">vending-unoq.service</text>
+  <text class="t small" x="636" y="496">Restart=always · 700M max</text>
+
+  <text class="t small" x="540" y="556">Estado en memoria:</text>
+  <text class="t mono tiny" x="540" y="576">ORDERS · ORDERS_BY_REFERENCE</text>
+  <text class="t mono tiny" x="540" y="594">UNMATCHED_PAYMENTS</text>
+  <text class="t small" x="540" y="622">1 worker asyncio · sin base de datos</text>
+  <text class="t tiny" x="540" y="648">Código: /home/arduino/vending-solana-unoq</text>
+
+  <line class="link" x1="470" y1="512" x2="470" y2="756" marker-end="url(#arw-mint)"/>
+  <text class="t tiny" x="482" y="700">/dev/ttyHS1 · 115200 baud</text>
+
+  <!-- Solana -->
+  <rect x="900" y="120" width="300" height="190" rx="14" fill="#0d0d15" stroke="#3a2a55"/>
+  <text class="t zone" x="920" y="148" fill="#b57bff">SOLANA · MAINNET-BETA</text>
+  <text class="t mod" x="920" y="180">RPC HTTPS</text>
+  <text class="t mono tiny" x="920" y="198">api.mainnet-beta.solana.com</text>
+  <text class="t mod" x="920" y="226">RPC WSS</text>
+  <text class="t mono tiny" x="920" y="244">account_subscribe(ATA)</text>
+  <text class="t tiny" x="920" y="272">USDC mint EPjF…Dt1v · 6 decimales</text>
+  <text class="t tiny" x="920" y="290">ATA comercio 7j3a…Tx5</text>
+
+  <line class="link" x1="832" y1="236" x2="896" y2="236" marker-end="url(#arw-violet)"/>
+  <text class="t tiny" x="836" y="222">HTTPS / WSS</text>
+
+  <!-- LEDs -->
+  <rect x="900" y="340" width="300" height="170" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="920" y="368" fill="#5aa9ff">LEDS DE PLACA · SYSFS</text>
+  <circle cx="922" cy="396" r="5" fill="#14f195"/>
+  <text class="t small" x="938" y="400">green:user   · listo</text>
+  <circle cx="922" cy="424" r="5" fill="#5aa9ff"/>
+  <text class="t small" x="938" y="428">blue:user    · pagado</text>
+  <circle cx="922" cy="452" r="5" fill="#ff5d5d"/>
+  <text class="t small" x="938" y="456">red:user     · error</text>
+  <text class="t mono tiny" x="920" y="486">/sys/class/leds/&lt;led&gt;/brightness</text>
+
+  <line class="link" x1="702" y1="401" x2="896" y2="401" marker-end="url(#arw)"/>
+  <text class="t tiny" x="736" y="392">write 1 / 0</text>
+
+  <!-- Entorno -->
+  <rect x="900" y="530" width="300" height="160" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="920" y="558" fill="#ffb86b">ENTORNO DE PRUEBA · 2026-10</text>
+  <text class="t tiny" x="920" y="584">wlan0 DOWN · ZeroTier 192.168.196.62/24</text>
+  <text class="t tiny" x="920" y="604">sin ruta por defecto → RPC inalcanzable</text>
+  <text class="t tiny" x="920" y="624">reloj sin NTP → TLS “not yet valid”</text>
+  <text class="t tiny" x="920" y="644">WiFi WCN3990 en RMA (ver evidencia)</text>
+  <text class="t tiny" x="920" y="668">Los LEDs y el relé funcionan igual.</text>
+
+  <!-- MCU -->
+  <rect x="380" y="760" width="470" height="110" rx="14" fill="#0d0d15" stroke="#3b3320"/>
+  <text class="t zone" x="400" y="788" fill="#ffb86b">MCU · STM32U585 · ZEPHYR</text>
+  <text class="t small" x="400" y="812">firmware/unoq_gpio_control.ino · pines 0–19</text>
+  <text class="t small" x="400" y="832">READ · WRITE · ANALOG · PWM (ASCII sobre Serial)</text>
+  <text class="t small" x="400" y="852">D7 = relé · A0–A5 = analógicos (14–19)</text>
+
+  <!-- Relé -->
+  <rect x="900" y="760" width="300" height="110" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="920" y="788" fill="#14f195">RELÉ Y CARGA</text>
+  <text class="t small" x="920" y="812">D7 → módulo relé optoacoplado</text>
+  <text class="t small" x="920" y="832">Carga 5 V con fuente externa</text>
+  <text class="t tiny" x="920" y="854">Nunca alimentar la carga desde el pin</text>
+
+  <line class="link" x1="850" y1="815" x2="896" y2="815" marker-end="url(#arw-mint)"/>
+  <text class="t tiny" x="858" y="806">D7</text>
+
+  <!-- Leyenda -->
+  <rect x="40" y="340" width="250" height="170" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="60" y="368" fill="#9a9ab0">LEYENDA</text>
+  <line class="link" x1="60" y1="394" x2="104" y2="394" marker-end="url(#arw)"/>
+  <text class="t small" x="114" y="398">llamada / flujo</text>
+  <line x1="60" y1="420" x2="104" y2="420" stroke="#14f195" stroke-width="1.6" marker-end="url(#arw-mint)"/>
+  <text class="t small" x="114" y="424">hardware / GPIO</text>
+  <line x1="60" y1="446" x2="104" y2="446" stroke="#b57bff" stroke-width="1.6" marker-end="url(#arw-violet)"/>
+  <text class="t small" x="114" y="450">red Solana</text>
+  <text class="t tiny" x="60" y="480">Cada comando al MCU crea un socket</text>
+  <text class="t tiny" x="60" y="496">TCP nuevo y espera respuesta “OK”.</text>
+</svg>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vending Bebidas · Paga con USDC</title>
+  <link rel="stylesheet" href="/static/style.css?v=20260912h">
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1 class="brand">🥤 Vending Bebidas</h1>
+      <p class="subtitle">
+        Paga al instante con USDC 💳 <span class="dot">●</span> Sin vueltas
+      </p>
+    </header>
+
+    <p class="tagline">🧊 8 bebidas bien frías, listas en un toque.</p>
+
+    <div class="layout">
+      <!-- COLUMNA IZQUIERDA: grilla de productos -->
+      <section class="grid" id="catalog">
+        {% for p in products %}
+        <div class="card" id="card-{{ p.sku }}">
+          <div class="card-img">
+            {% if p.image %}<img src="/static/{{ p.image }}" alt="{{ p.name }}">{% endif %}
+          </div>
+          <h2>{{ p.name }}</h2>
+          <p class="price">{{ "%.2f"|format(p.price_usdc) }} USDC</p>
+          <button class="btn btn-add" data-sku="{{ p.sku }}">
+            <span class="btn-label">Añadir +</span>
+          </button>
+        </div>
+        {% endfor %}
+      </section>
+
+      <!-- COLUMNA DERECHA: carrito fijo -->
+      <aside class="cart" id="cart">
+        <h2 class="cart-title">🛒 Tu carrito</h2>
+        <ul class="cart-list" id="cart-list">
+          <li class="cart-empty" id="cart-empty">El carrito está vacío</li>
+        </ul>
+        <div class="cart-total" id="cart-total">
+          <span>Total</span>
+          <strong id="cart-total-amount">0.00 USDC</strong>
+        </div>
+        <button class="btn btn-danger" id="btn-clear" disabled>Vaciar carrito</button>
+        <button class="btn btn-pay" id="btn-pay" disabled><span class="btn-label">Pagar</span></button>
+        <p class="hint" id="hint">Añade bebidas a tu carrito y paga con tu wallet. 🚀</p>
+      </aside>
+    </div>
+
+    <footer class="footer">
+      Vending Bebidas · Pago instantáneo con USDC <span class="dot">●</span> Rápido y seguro
+    </footer>
+  </main>
+
+  <script>
+    // Catálogo servido por el backend (sku -> nombre, precio, imagen)
+    const PRODUCTS = {{ products | tojson }};
+
+    // Carrito: objeto { sku: true } — máximo 1 unidad por producto
+    let cart = {};
+
+    function renderCart() {
+      const listEl = document.getElementById('cart-list');
+      const emptyEl = document.getElementById('cart-empty');
+      const totalEl = document.getElementById('cart-total-amount');
+      const clearBtn = document.getElementById('btn-clear');
+      const payBtn = document.getElementById('btn-pay');
+
+      // Limpiar lista (conservando el elemento "vacío")
+      listEl.querySelectorAll('.cart-item').forEach(el => el.remove());
+
+      const skus = Object.keys(cart);
+      let total = 0;
+
+      if (skus.length === 0) {
+        emptyEl.style.display = 'block';
+        clearBtn.disabled = true;
+        payBtn.disabled = true;
+        totalEl.textContent = '0.00 USDC';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      clearBtn.disabled = false;
+      payBtn.disabled = false;
+
+      for (const sku of skus) {
+        const p = PRODUCTS.find(x => x.sku === sku);
+        if (!p) continue;
+        total += p.price_usdc;
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.dataset.sku = sku;
+        li.innerHTML = `
+          <div class="cart-item-info">
+            <span class="cart-item-name">${p.name}</span>
+            <span class="cart-item-price">${p.price_usdc.toFixed(2)} USDC</span>
+          </div>
+          <button class="btn-remove" data-sku="${sku}" aria-label="Quitar">−</button>
+        `;
+        listEl.appendChild(li);
+      }
+
+      totalEl.textContent = total.toFixed(2) + ' USDC';
+
+      // Actualizar botones de la grilla
+      document.querySelectorAll('.btn-add').forEach(btn => {
+        const sku = btn.dataset.sku;
+        if (cart[sku]) {
+          btn.classList.add('in-cart');
+          btn.querySelector('.btn-label').textContent = 'En carrito ✓';
+        } else {
+          btn.classList.remove('in-cart');
+          btn.querySelector('.btn-label').textContent = 'Añadir +';
+        }
+      });
+    }
+
+    function addToCart(sku) {
+      if (cart[sku]) return; // máximo 1
+      cart[sku] = true;
+      renderCart();
+    }
+
+    function removeFromCart(sku) {
+      delete cart[sku];
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = {};
+      renderCart();
+    }
+
+    // Eventos: añadir desde la grilla
+    document.querySelectorAll('.btn-add').forEach(btn => {
+      btn.addEventListener('click', () => addToCart(btn.dataset.sku));
+    });
+
+    // Eventos: quitar / vaciar (delegación en la lista del carrito)
+    document.getElementById('cart-list').addEventListener('click', (e) => {
+      const rm = e.target.closest('.btn-remove');
+      if (rm) removeFromCart(rm.dataset.sku);
+    });
+    document.getElementById('btn-clear').addEventListener('click', clearCart);
+
+    // Evento: pagar
+    document.getElementById('btn-pay').addEventListener('click', async () => {
+      const skus = Object.keys(cart);
+      if (skus.length === 0) return;
+      const payBtn = document.getElementById('btn-pay');
+      payBtn.disabled = true;
+      payBtn.classList.add('buying');
+      payBtn.querySelector('.btn-label').textContent = 'Creando orden…';
+      try {
+        const items = skus.map(sku => ({sku}));
+        const resp = await fetch('/order', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({items})
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'error');
+        // Pasar el carrito a la página de pago vía localStorage
+        localStorage.setItem('vending_cart', JSON.stringify(skus));
+        window.location.href = `/order/${data.order_id}/payment`;
+      } catch (e) {
+        alert('Error: ' + e.message);
+        payBtn.disabled = false;
+        payBtn.classList.remove('buying');
+        payBtn.querySelector('.btn-label').textContent = 'Pagar';
+      }
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>

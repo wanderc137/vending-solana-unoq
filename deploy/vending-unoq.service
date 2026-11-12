@@ -1,0 +1,24 @@
+[Unit]
+Description=Vending Solana USDC - Arduino UNO Q
+Documentation=file:///home/arduino/vending-solana-unoq/README.md
+After=network-online.target arduino-router.service
+Wants=network-online.target
+# El backend "unoq" necesita el monitor del arduino-router (127.0.0.1:7500).
+Requires=arduino-router.service
+
+[Service]
+Type=simple
+User=arduino
+Group=arduino
+WorkingDirectory=/home/arduino/vending-solana-unoq
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/arduino/vending-solana-unoq/.venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+Restart=always
+RestartSec=5
+# Límites sanos para 1.7 GiB de RAM.
+MemoryMax=700M
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+# requirements-pi.txt — Dependencias para Raspberry Pi (backend gpiozero).
+-r requirements.txt
+
+gpiozero>=2.0
+# I-010: backend lgpio de gpiozero, imprescindible para GPIO en Pi 5
+# (libgpiod /dev/gpiochip4; la Pi 5 NO tiene /dev/gpiomem).
+lgpio>=0.2.2.0

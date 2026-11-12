@@ -1,0 +1,68 @@
+# catalog.yaml — Catálogo de productos de la máquina expendedora v2.
+# 8 bebidas en lata (grilla 4×2), precios semejantes pero todos distintos.
+# Precio en unidades base (6 decimales): 1.00 USDC = 1_000_000.
+
+products:
+  - sku: coca-cola
+    name: "Coca-Cola (lata 330 ml)"
+    price_usdc: 1.00
+    price_base: 1000000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "coca-cola.png"
+
+  - sku: fanta
+    name: "Fanta (lata 330 ml)"
+    price_usdc: 0.95
+    price_base: 950000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "fanta.png"
+
+  - sku: sprite
+    name: "Sprite (lata 330 ml)"
+    price_usdc: 1.05
+    price_base: 1050000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "sprite.png"
+
+  - sku: limon-soda
+    name: "Limón Soda (lata 330 ml)"
+    price_usdc: 0.90
+    price_base: 900000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "limon-soda.png"
+
+  - sku: agua-sin-gas
+    name: "Agua sin gas (lata 500 ml)"
+    price_usdc: 0.80
+    price_base: 800000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "agua-sin-gas.png"
+
+  - sku: agua-con-gas
+    name: "Agua con gas (lata 500 ml)"
+    price_usdc: 0.85
+    price_base: 850000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "agua-con-gas.png"
+
+  - sku: energetica
+    name: "Bebida energética (lata 250 ml)"
+    price_usdc: 1.50
+    price_base: 1500000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "energetica.png"
+
+  - sku: te-helado
+    name: "Té helado (lata 330 ml)"
+    price_usdc: 1.20
+    price_base: 1200000
+    pulse_seconds: 2.5
+    dispense_pin: 7
+    image: "te-helado.png"

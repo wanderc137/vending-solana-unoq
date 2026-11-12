@@ -1,0 +1,51 @@
+# config.yaml — Configuración de la máquina expendedora cripto sobre Arduino UNO Q
+# Preferencia: variables de entorno / .env > este archivo > defaults de config.py.
+
+# --- Red Solana -------------------------------------------------------
+# Producción de la máquina (igual que la Raspberry Pi): mainnet-beta + USDC real.
+network: mainnet-beta
+
+rpc_http: "https://api.mainnet-beta.solana.com"
+rpc_ws: "wss://api.mainnet-beta.solana.com"
+rpc_http_backup: "https://api.mainnet-beta.solana.com"
+
+# USDC mainnet (6 decimales). Para devnet: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+usdc_mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+usdc_decimals: 6
+
+# --- Wallet del comercio ---------------------------------------------
+# La UNO Q NO guarda la clave privada: solo el pubkey (modo "solo pubkey").
+# Si existe wallet.json, se usa ese keypair (modo keypair, permite refunds).
+wallet_path: "wallet.json"
+merchant_pubkey: "5FMSn5BqmnxcZjf7K84PU4bpKhuFoioZQhoA5qSQs56M"
+
+# --- Tiempos ----------------------------------------------------------
+order_timeout_seconds: 60
+dispense_pulse_seconds: 2.5
+poll_interval_ms: 1500
+
+# --- Dispensador ------------------------------------------------------
+# Pin del header de la UNO Q (D0-D13 = 0-13, A0-A5 = 14-19). Relé en D7.
+dispense_pin: 7
+# auto detecta (unoq -> gpiozero -> stub); fuerza con unoq | gpiozero | stub.
+dispenser_mode: auto
+# Módulo de relé activo-alto. Si el tuyo es activo-bajo, pon false.
+relay_active_high: true
+
+# Puente con el MCU STM32 (monitor del arduino-router). NO cambiar en la UNO Q.
+mcu_host: "127.0.0.1"
+mcu_port: 7500
+mcu_timeout_ms: 2000
+
+# LEDs de estado de la placa UNO Q (sysfs /sys/class/leds).
+unoq_led_ready: "green:user"
+unoq_led_paid: "blue:user"
+unoq_led_error: "red:user"
+
+# Pines BCM del backend Raspberry Pi (no se usan en la UNO Q).
+led_ready_pin: 27
+led_paid_pin: 22
+led_error_pin: 23
+
+# --- Servicio ---------------------------------------------------------
+http_port: 8000

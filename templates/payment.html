@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pago · {{ order.total_usdc }} USDC</title>
+  <link rel="stylesheet" href="/static/style.css?v=20260912h">
+  <style>
+/* Fila QR + cronómetro: DOS COLUMNAS en la MISMA FILA, separadas */
+    .payment-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: nowrap;
+      margin: 22px 0 16px;
+    }
+    /* Cronómetro circular: mismo tamaño que el QR (340px) */
+    .timer-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 340px;
+      height: 340px;
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+    .qr-wrap {
+      flex-shrink: 0;
+      flex-grow: 0;
+      margin: 0 !important;
+    }
+    .timer-svg { width: 340px; height: 340px; }
+    .timer-bg { fill: none; stroke: rgba(255, 255, 255, 0.10); stroke-width: 10; }
+    .timer-fg {
+      fill: none;
+      stroke: url(#timer-grad);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 1s linear, stroke .3s ease;
+    }
+    .timer-num {
+      font-size: 2.4rem;
+      font-weight: 800;
+      fill: #fff;
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: 0.02em;
+    }
+    .timer-unit {
+      font-size: .75rem;
+      font-weight: 600;
+      fill: rgba(255, 255, 255, 0.55);
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: .1em;
+    }
+    .timer-label-low { color: #ff5d5d !important; }
+    /* Monto protagonista: grande, con personalidad y degradado de marca */
+    .pay-amount {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 4px 0 10px;
+    }
+    .pay-amount .amount-big {
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.05;
+      background: linear-gradient(120deg, #fff 20%, var(--mint) 55%, var(--violet-soft) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 40px rgba(20, 241, 149, 0.25);
+      animation: fadeUp .5s ease both;
+    }
+    .pay-amount .amount-usdc {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: .45em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    /* Resumen de productos: imagen + nombre + precio en la pantalla de pago */
+    .summary-list {
+      width: 100%;
+      max-width: 420px;
+      margin: 12px auto 0;
+      text-align: left;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 10px 16px;
+      box-shadow: 0 10px 34px rgba(0,0,0,.35);
+    }
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      font-size: .98rem;
+    }
+    .summary-item + .summary-item { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+    .summary-product-img {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(153, 69, 255, 0.35));
+    }
+    .summary-product-name { flex: 1; color: var(--text); font-weight: 700; }
+    .summary-product-price { color: var(--mint); font-weight: 800; white-space: nowrap; }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      margin-top: 4px;
+      padding: 12px 0 8px;
+      font-size: 1.05rem;
+    }
+    .summary-total strong { color: var(--mint); }
+    /* Contenedor ancho para que quepan las dos columnas en la misma fila */
+    .container.payment-page { max-width: 900px; }
+    @media (max-width: 760px) {
+      .payment-row { flex-direction: column; }
+      .timer-wrap, .qr, .qr-wrap { width: 280px; height: 280px; }
+      .timer-svg { width: 280px; height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container narrow payment-page">
+    <header class="header">
+      <h1 class="brand">🥤 Vending Bebidas</h1>
+    </header>
+
+    <!-- Monto protagonista -->
+    <div class="pay-amount">
+      <span class="amount-big">{{ "%.2f"|format(order.total_usdc) }}</span>
+      <span class="amount-usdc">USDC</span>
+    </div>
+
+    <div class="summary-list">
+      {% for item in order.items %}
+      <div class="summary-item">
+        <img class="summary-product-img" src="/static/{{ item.sku }}.png" alt="{{ item.product_name }}">
+        <span class="summary-product-name">{{ item.product_name }}</span>
+        <span class="summary-product-price">{{ "%.2f"|format(item.price_usdc) }} USDC</span>
+      </div>
+      {% endfor %}
+      <div class="summary-total">
+        <strong>Total</strong>
+        <strong>{{ "%.2f"|format(order.total_usdc) }} USDC</strong>
+      </div>
+    </div>
+
+    <!-- Cronómetro circular a la izquierda del QR, mismo tamaño y separado -->
+    <div class="payment-row">
+      <div class="timer-wrap">
+        <svg class="timer-svg" viewBox="0 0 150 150">
+          <defs>
+            <linearGradient id="timer-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#14f195"/>
+              <stop offset="100%" stop-color="#9945ff"/>
+            </linearGradient>
+          </defs>
+          <circle class="timer-bg" cx="75" cy="75" r="62"></circle>
+          <circle class="timer-fg" id="timer-fg" cx="75" cy="75" r="62"></circle>
+          <text class="timer-num" id="timer-num" x="75" y="68">--</text>
+          <text class="timer-unit" id="timer-unit" x="75" y="98">SEGUNDOS</text>
+        </svg>
+      </div>
+
+      <div class="qr-wrap">
+        <img class="qr" src="/order/{{ order.order_id }}/qr" alt="QR de pago USDC">
+      </div>
+    </div>
+
+    <p class="hint">Escanea el QR con la cámara de Phantom.<br>
+      Phantom te pedirá el monto: <strong>digita {{ "%.2f"|format(order.total_usdc) }}</strong> (USDC).</p>
+
+    <p class="status" id="status" data-order-id="{{ order.order_id }}" style="display:none;">
+      Esperando pago…
+    </p>
+
+    <p style="margin-top: 18px;">
+      <button class="btn btn-danger" id="btn-cancel">Cancelar orden</button>
+    </p>
+
+    <a class="btn-ghost" href="/">Volver al catálogo</a>
+
+    <footer class="footer">
+      Vending Bebidas · Pago instantáneo con USDC <span class="dot">●</span> Rápido y seguro
+    </footer>
+  </main>
+
+  <script>
+    const orderId = document.querySelector('#status').dataset.orderId;
+    const statusEl = document.querySelector('#status');
+    const cancelBtn = document.querySelector('#btn-cancel');
+    const timerFg = document.querySelector('#timer-fg');
+    const timerNum = document.querySelector('#timer-num');
+    const timerUnit = document.querySelector('#timer-unit');
+    let done = false;
+    let expiresAt = null;
+
+    const TOTAL_S = {{ timeout_s }};
+    const CIRC = 2 * Math.PI * 62; // circunferencia del anillo (r=62)
+    timerFg.style.strokeDasharray = CIRC;
+
+    // Actualiza anillo + número según segundos restantes
+    function renderTimer(remaining) {
+      const rem = Math.max(0, Math.min(TOTAL_S, remaining));
+      const frac = rem / TOTAL_S;
+      const dash = CIRC * (1 - frac);
+      timerFg.style.strokeDashoffset = dash;
+
+      const whole = Math.ceil(rem);
+      const mm = String(Math.floor(whole / 60)).padStart(1, '0');
+      const ss = String(whole % 60).padStart(2, '0');
+      timerNum.textContent = `${mm}:${ss}`;
+      timerUnit.textContent = whole === 1 ? 'SEGUNDO' : 'SEGUNDOS';
+
+      const low = rem <= 10;
+      timerFg.style.stroke = low ? '#ff5d5d' : 'url(#timer-grad)';
+      timerFg.classList.toggle('timer-label-low', low);
+      timerNum.style.fill = low ? '#ff5d5d' : '#fff';
+    }
+
+    cancelBtn.addEventListener('click', async () => {
+      cancelBtn.disabled = true;
+      cancelBtn.textContent = 'Cancelando…';
+      try {
+        const r = await fetch(`/order/${orderId}/cancel`, {method: 'POST'});
+        if (!r.ok) {
+          const e = await r.json().catch(() => ({}));
+          alert('No se pudo cancelar: ' + (e.detail || 'error'));
+          cancelBtn.disabled = false;
+          cancelBtn.textContent = 'Cancelar orden';
+          return;
+        }
+        done = true;
+        window.location.href = `/order/${orderId}/cancelled`;
+      } catch (e) {
+        alert('Error de red: ' + e.message);
+        cancelBtn.disabled = false;
+        cancelBtn.textContent = 'Cancelar orden';
+      }
+    });
+
+    // Tick suave cada 250ms mientras haya expiresAt local
+    setInterval(() => {
+      if (done || expiresAt === null) return;
+      const rem = (expiresAt - Date.now()) / 1000;
+      if (rem <= 0) {
+        done = true;
+        window.location.href = '/';
+        return;
+      }
+      renderTimer(rem);
+    }, 250);
+
+    async function poll() {
+      if (done) return;
+      try {
+        const r = await fetch(`/order/${orderId}`);
+        const s = await r.json();
+        if (s.status === 'pagada' || s.status === 'dispensada') {
+          done = true;
+          window.location.href = `/order/${orderId}/confirmed`;
+        } else if (s.status === 'expirada') {
+          done = true;
+          window.location.href = '/';
+        } else if (s.status === 'cancelada') {
+          done = true;
+          window.location.href = `/order/${orderId}/cancelled`;
+        } else {
+          const rem = s.remaining_s ?? TOTAL_S;
+          if (!expiresAt) expiresAt = Date.now() + rem * 1000;
+          renderTimer(rem);
+        }
+      } catch (e) { /* reintentar */ }
+    }
+    setInterval(poll, 1500);
+    poll();
+  </script>
+</body>
+</html>

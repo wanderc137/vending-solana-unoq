@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vending Solana USDC · Arduino UNO Q</title>
+<meta name="description" content="Máquina expendedora con Solana Pay y USDC sobre Arduino UNO Q: FastAPI, monitor de pagos en tiempo real y dispensado por relé gobernado por el STM32U585.">
+<meta name="author" content="wanderc137">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vending Solana USDC · Arduino UNO Q">
+<meta property="og:description" content="Máquina expendedora con Solana Pay y USDC sobre Arduino UNO Q: FastAPI, monitor de pagos en tiempo real y dispensado por relé gobernado por el STM32U585.">
+<meta property="og:url" content="https://wanderc137.github.io/vending-solana-unoq/">
+<meta property="og:image" content="https://wanderc137.github.io/vending-solana-unoq/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vending Solana USDC · Arduino UNO Q">
+<meta name="twitter:description" content="Máquina expendedora con Solana Pay y USDC sobre Arduino UNO Q: FastAPI, monitor de pagos en tiempo real y dispensado por relé gobernado por el STM32U585.">
+<meta name="twitter:image" content="https://wanderc137.github.io/vending-solana-unoq/assets/og.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2305070c'/><rect x='22' y='22' width='56' height='56' rx='12' fill='none' stroke='%2314F195' stroke-width='7'/><circle cx='50' cy='50' r='9' fill='%2314F195'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:#05070c;color:#e8edf6;
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--accent);color:#04110c}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+h1,h2,h3,h4{font-family:'Space Grotesk','Inter',sans-serif;line-height:1.05;letter-spacing:-.03em;margin:0}
+p{margin:0}
+.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+.wrap{width:min(1180px,calc(100% - 48px));margin:0 auto}
+.grid-overlay{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 78%);
+}
+.glow{
+  position:fixed;z-index:0;pointer-events:none;filter:blur(90px);opacity:.20;
+  width:720px;height:720px;border-radius:50%;
+}
+.glow.one{top:-340px;right:-180px;background:var(--accent)}
+.glow.two{top:380px;left:-380px;background:var(--accent2);opacity:.14}
+.nav{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  background:rgba(5,7,12,.72);border-bottom:1px solid rgba(255,255,255,.07);
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:-.02em}
+.brand-mark{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#05100c;
+  box-shadow:0 0 30px color-mix(in srgb,var(--accent) 35%,transparent);
+}
+.brand-mark svg{width:22px;height:22px;stroke:#05100c;fill:none;stroke-width:1.8}
+.brand small{display:block;font-size:10px;letter-spacing:.18em;color:#8b9ab0;font-weight:600;text-transform:uppercase}
+.nav-links{display:flex;align-items:center;gap:26px;font-size:14px;color:#a9b6c8}
+.nav-links a:hover{color:#fff}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 22px;border-radius:12px;font-weight:650;font-size:14.5px;
+  border:1px solid transparent;transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{
+  background:linear-gradient(100deg,var(--accent),var(--accent2));color:#04110c;
+  box-shadow:0 12px 34px -12px color-mix(in srgb,var(--accent) 70%,transparent);
+}
+.btn-primary:hover{box-shadow:0 18px 44px -12px color-mix(in srgb,var(--accent) 80%,transparent)}
+.btn-ghost{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.14);color:#e8edf6}
+.btn-ghost:hover{background:rgba(255,255,255,.07)}
+.btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+.hero{position:relative;z-index:1;padding:96px 0 72px}
+.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:64px;align-items:center}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:12px;margin-bottom:22px;
+}
+.eyebrow::before{content:"";width:34px;height:1px;background:var(--accent);opacity:.7}
+h1{font-size:clamp(42px,6.4vw,80px);font-weight:700;letter-spacing:-.045em}
+.grad{background:linear-gradient(100deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(17px,1.5vw,19px);color:#aab7c9;margin-top:24px;max-width:60ch}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.badge{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;
+  padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.12);
+  color:#9fb0c4;background:rgba(255,255,255,.025);
+}
+.hero-visual{position:relative}
+.visual-frame{
+  border:1px solid rgba(255,255,255,.11);border-radius:20px;overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.012));
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.02) inset;
+  padding:14px;
+}
+.visual-frame img{border-radius:12px;width:100%}
+.visual-caption{font-size:11.5px;color:#7f8ea3;margin-top:12px;text-align:right;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.float-chip{
+  position:absolute;left:-22px;bottom:34px;display:flex;align-items:center;gap:10px;
+  background:rgba(9,13,21,.92);border:1px solid rgba(255,255,255,.14);border-radius:13px;
+  padding:11px 15px;font-size:12.5px;color:#c7d3e2;backdrop-filter:blur(10px);
+  box-shadow:0 20px 50px -20px #000;
+}
+.float-chip b{color:var(--accent);font-family:'Space Grotesk',sans-serif;font-size:16px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent);animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+/* vending kiosk */
+.kiosk{
+  border:1px solid rgba(255,255,255,.13);border-radius:22px;padding:18px;
+  background:linear-gradient(165deg,#0b1019,#070a11 60%,#0a0f18);
+  box-shadow:0 45px 100px -45px #000,0 0 0 1px rgba(255,255,255,.02) inset;
+}
+.kiosk-head{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:#8494a9;padding:2px 4px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.kiosk-head .timer{margin-left:auto;color:var(--accent)}
+.kiosk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 0}
+.prod{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.075);border-radius:13px;padding:12px;display:flex;align-items:center;gap:11px}
+.prod img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.prod span{font-size:11.5px;color:#c3cfdd;display:block;line-height:1.25}
+.prod b{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)}
+.kiosk-pay{display:flex;align-items:center;gap:12px;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);background:color-mix(in srgb,var(--accent) 7%,transparent);border-radius:13px;padding:12px 14px}
+.kiosk-pay .sol{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04110c;font-size:23px;font-weight:800}
+.kiosk-pay small{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#8ea0b5}
+.kiosk-pay strong{font-size:15px}
+.kiosk-pay .pill{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;background:var(--accent);color:#04110c;padding:7px 11px;border-radius:8px;font-weight:700}
+.stats{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.018)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.stat{padding:34px 26px;border-left:1px solid rgba(255,255,255,.06)}
+.stat:first-child{border-left:0;padding-left:0}
+.stat-value{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,3.4vw,42px);font-weight:700;letter-spacing:-.04em;background:linear-gradient(100deg,#fff,#a9b8cc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-label{font-size:12px;color:#7f8ea3;letter-spacing:.04em;margin-top:3px}
+.section{position:relative;z-index:1;padding:96px 0}
+.section.tight{padding-top:56px}
+.section-head{max-width:780px;margin-bottom:44px}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+h2{font-size:clamp(30px,4.1vw,50px);font-weight:700}
+.section-sub{color:#97a6ba;font-size:17px;margin-top:16px;max-width:68ch}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{
+  border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:28px;
+  background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+}
+.card .icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);margin-bottom:18px}
+.card .icon svg{width:21px;height:21px;stroke:var(--accent);fill:none;stroke-width:1.8}
+.card h3{font-size:20px;margin-bottom:9px}
+.card p{color:#9dabbf;font-size:14.5px}
+.timeline{position:relative;margin-top:10px}
+.timeline::before{content:"";position:absolute;left:23px;top:12px;bottom:12px;width:1px;background:linear-gradient(var(--accent),rgba(255,255,255,.08))}
+.step{display:grid;grid-template-columns:48px 1fr;gap:22px;padding:19px 0;align-items:start}
+.step-num{
+  width:47px;height:47px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);
+  background:#080c14;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  position:relative;z-index:1;box-shadow:0 0 26px -6px color-mix(in srgb,var(--accent) 45%,transparent);
+}
+.step-body h3{font-size:18px;margin-bottom:5px}
+.step-body p{color:#93a2b7;font-size:14.5px;max-width:78ch}
+.figure{
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:16px;
+  background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.008));
+}
+.figure img{width:100%;border-radius:12px}
+.figure figcaption{font-size:12px;color:#7f8ea3;margin-top:12px;font-family:'JetBrains Mono',monospace}
+.arch-points{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.arch-points .card{padding:20px}
+.arch-points .card h4{font-size:14.5px;margin-bottom:5px}
+.arch-points .card p{font-size:13px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.feature{border:1px solid rgba(255,255,255,.085);border-radius:16px;padding:23px;background:rgba(255,255,255,.022);transition:border-color .2s,background .2s,transform .2s}
+.feature:hover{border-color:color-mix(in srgb,var(--accent) 38%,transparent);background:rgba(255,255,255,.038);transform:translateY(-3px)}
+.feature .icon{width:37px;height:37px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 10%,transparent);margin-bottom:15px}
+.feature .icon svg{width:19px;height:19px;stroke:var(--accent);fill:none;stroke-width:1.8}
+.feature h3{font-size:15.5px;margin-bottom:6px}
+.feature p{font-size:13.2px;color:#94a3b8;line-height:1.55}
+.stack-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:22px;align-items:start}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#aab8ca}
+.terminal{border:1px solid rgba(255,255,255,.13);border-radius:16px;overflow:hidden;background:#070a10;box-shadow:0 30px 70px -35px #000}
+.terminal-bar{display:flex;align-items:center;gap:7px;padding:12px 15px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)}
+.terminal-bar i{width:10px;height:10px;border-radius:50%;background:#ff5f57;display:block}
+.terminal-bar i:nth-child(2){background:#febc2e}
+.terminal-bar i:nth-child(3){background:#28c840}
+.terminal-bar span{margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#718197;letter-spacing:.08em}
+.terminal pre{margin:0;padding:20px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:12.2px;line-height:1.8;color:#c6d2e0}
+.terminal .p{color:var(--accent)}
+.terminal .c{color:#68788d}
+.note{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:12.5px;color:#8d9cb0;line-height:1.55}
+.note svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:1.8;flex:0 0 auto;margin-top:2px}
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.doc-card{display:block;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:24px;background:rgba(255,255,255,.022);transition:border-color .2s,transform .2s,background .2s}
+.doc-card:hover{border-color:color-mix(in srgb,var(--accent) 40%,transparent);transform:translateY(-3px);background:rgba(255,255,255,.04)}
+.doc-card .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--accent);text-transform:uppercase}
+.doc-card h3{font-size:17px;margin:10px 0 6px}
+.doc-card p{font-size:13px;color:#93a2b7}
+.doc-card .arrow{display:flex;align-items:center;gap:6px;margin-top:16px;font-size:12.5px;color:#c2cfdf}
+.doc-card .arrow svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
+.doc-card:hover .arrow svg{transform:translateX(4px)}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.gallery .figure{margin:0}
+.cta{position:relative;z-index:1;padding:40px 0 96px}
+.cta-card{
+  border-radius:24px;padding:52px;text-align:center;position:relative;overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+  background:
+    radial-gradient(700px 300px at 50% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%),
+    linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+}
+.cta-card h2{font-size:clamp(28px,3.7vw,42px)}
+.cta-card p{color:#9dabbf;max-width:62ch;margin:16px auto 0}
+.cta-card .hero-actions{justify-content:center}
+footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);padding:52px 0 36px;background:rgba(4,6,10,.6)}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}
+.foot-brand{display:flex;align-items:center;gap:11px;font-weight:700;margin-bottom:12px}
+.foot-brand .brand-mark{width:32px;height:32px;border-radius:9px}
+.foot-p{font-size:13px;color:#8493a7;max-width:38ch}
+.foot h4{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#718197;margin-bottom:13px;font-weight:500}
+.foot-links{display:flex;flex-direction:column;gap:8px;font-size:13px;color:#9aa9bc}
+.foot-links a:hover{color:#fff}
+.foot-bottom{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.07);margin-top:38px;padding-top:22px;font-size:11.5px;color:#6f7f93;font-family:'JetBrains Mono',monospace}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.live-dot{animation:none}html{scroll-behavior:auto}}
+@media (max-width:980px){
+  .hero-grid,.split,.stack-grid,.gallery{grid-template-columns:1fr}
+  .hero{padding-top:64px}
+  .hero-visual{order:-1}
+  .features{grid-template-columns:1fr 1fr}
+  .arch-points{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat:nth-child(3){border-left:0;padding-left:0}
+  .stat{border-top:1px solid rgba(255,255,255,.06)}
+  .stat:nth-child(-n+2){border-top:0}
+  .docs-grid{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+}
+@media (max-width:620px){
+  .wrap{width:calc(100% - 32px)}
+  .features{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat{padding:24px 16px}
+  .cta-card{padding:34px 22px}
+  .float-chip{left:8px;bottom:16px}
+  .foot-grid{grid-template-columns:1fr}
+  .section{padding:72px 0}
+}
+</style>
+</head>
+<body style="--accent:#14F195;--accent2:#9945FF">
+<div class="grid-overlay"></div>
+<div class="glow one"></div>
+<div class="glow two"></div>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><circle cx="12" cy="12" r="2.5"/></svg></span>
+      <span>Vending Solana<small>Arduino UNO Q · Portfolio</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Navegación">
+      <a href="#problema">Visión</a>
+      <a href="#como">Cómo funciona</a>
+      <a href="#arquitectura">Arquitectura</a>
+      <a href="#docs">Documentación</a>
+      <a class="btn btn-ghost" style="padding:9px 15px" href="https://github.com/wanderc137/vending-solana-unoq" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">ARDUINO UNO Q · PAGOS ON-CHAIN</div>
+      <h1>Vending Solana <span class='grad'>USDC</span></h1>
+      <p class="lead">La máquina expendedora que acepta USDC y dispensa con el MCU. Sin monedas, sin datáfono y sin clave privada en la placa.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/wanderc137/vending-solana-unoq" target="_blank" rel="noopener">Ver el repositorio <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="https://github.com/wanderc137/vending-solana-unoq#readme" target="_blank" rel="noopener">Leer la documentación</a>
+      </div>
+      <div class="hero-badges"><span class="badge">Python 3.13.5</span><span class="badge">FastAPI 0.159</span><span class="badge">Solana Pay</span><span class="badge">USDC · SPL</span><span class="badge">Debian 13.2</span><span class="badge">MIT</span></div>
+    </div>
+    <div class="hero-visual">
+        <div class="kiosk" aria-label="Vista conceptual del kiosco de autoatención">
+          <div class="kiosk-head"><span class="live-dot"></span> KIOSCO · 08 SKUs <span class="timer">01:00</span></div>
+          <div class="kiosk-grid">
+            <div class="prod"><img src="assets/products/coca-cola.png" alt=""><div><span>Coca-Cola 330 ml</span><b>1.00 USDC</b></div></div>
+            <div class="prod"><img src="assets/products/fanta.png" alt=""><div><span>Fanta 330 ml</span><b>0.95 USDC</b></div></div>
+            <div class="prod"><img src="assets/products/energetica.png" alt=""><div><span>Energética 250 ml</span><b>1.50 USDC</b></div></div>
+            <div class="prod"><img src="assets/products/agua-sin-gas.png" alt=""><div><span>Agua 500 ml</span><b>0.80 USDC</b></div></div>
+          </div>
+          <div class="kiosk-pay"><div class="sol">◎</div><div><small>SOLANA PAY · USDC</small><strong>Total: 4.25 USDC</strong></div><span class="pill">PAGAR</span></div>
+        </div>
+        <div class="visual-caption">vista conceptual del kiosco · UI real en templates/</div>
+        </div>
+  </div>
+</section>
+
+<section class="stats"><div class="wrap stats-grid"><div class="stat"><div class="stat-value">8</div><div class="stat-label">bebidas en el catálogo</div></div><div class="stat"><div class="stat-value">< 2 s</div><div class="stat-label">detección de pago objetivo</div></div><div class="stat"><div class="stat-value">2,5 s</div><div class="stat-label">pulso de dispensado</div></div><div class="stat"><div class="stat-value">0</div><div class="stat-label">claves privadas en la placa</div></div></div></section>
+
+<section class="section" id="problema">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">01 — La idea</div>
+      <h2>Cobrar sin datáfono, sin intermediarios</h2>
+      <p class="section-sub">Una tienda de autoatención completa dentro de una placa: el cliente escanea un QR de Solana Pay, paga USDC desde su wallet y la máquina dispensa. El comercio recibe directo en su cuenta; la placa solo verifica.</p>
+    </div>
+    <div class="split">
+      <div class="card reveal"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20v.01M17 20v.01M20 17v3h-3"/></svg></div><h3>Los pagos tienen dueño</h3><p>Los datáfonos imponen comisiones, contratos y hardware cerrado. Integrar un pago propio suele significar una pasarela que retiene el dinero, añade latencia y decide cuándo te paga.</p></div>
+      <div class="card reveal"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M16 4l4 4M14 6l3 3"/></svg></div><h3>Un QR, liquidación directa</h3><p>Solana Pay convierte cualquier pantalla en un punto de cobro. El cliente paga USDC a la wallet del comercio y la placa confirma la transferencia contra un reference único. Sin custodia, sin clave privada que robar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section tight" id="como">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">02 — El recorrido</div>
+      <h2>Cómo funciona, paso a paso</h2>
+      <p class="section-sub">Del carrito al relé: seis pasos, cada uno con su validación y su estado visible.</p>
+    </div>
+    <div class="timeline reveal"><div class="step"><div class="step-num">01</div><div class="step-body"><h3>El cliente arma el carrito</h3><p>Hasta ocho SKUs distintos, una unidad por producto, con el total siempre visible en la pantalla.</p></div></div><div class="step"><div class="step-num">02</div><div class="step-body"><h3>El backend crea la orden</h3><p>Valida los SKU y recalcula el total desde catalog.yaml. El navegador nunca decide el monto.</p></div></div><div class="step"><div class="step-num">03</div><div class="step-body"><h3>Aparece el QR de Solana Pay</h3><p>El QR lleva wallet, mint de USDC y un reference único, pero no el monto: el cliente digita el total exacto.</p></div></div><div class="step"><div class="step-num">04</div><div class="step-body"><h3>El monitor escucha la cadena</h3><p>WebSocket a Solana más reconciliación cada 2 s. Valida mint, monto y reference antes de dar el pago por bueno.</p></div></div><div class="step"><div class="step-num">05</div><div class="step-body"><h3>El MCU dispensa</h3><p>Un pulso de 2,5 s en D7 a través de arduino-router. Cada bebida se despacha en orden, con LEDs de estado.</p></div></div><div class="step"><div class="step-num">06</div><div class="step-body"><h3>La orden se cierra</h3><p>Estado dispensada, carrito limpio y feedback en pantalla. La venta queda registrada para auditoría.</p></div></div></div>
+  </div>
+</section>
+
+<section class="section tight" id="arquitectura">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">03 — Bajo el capó</div>
+      <h2>Una placa, dos cerebros y la cadena</h2>
+      <p class="section-sub">El Linux embebido corre la web y el monitor de pagos; el STM32U585 es el único que toca el relé. La separación es deliberada: el dinero vive en la nube, la acción física en el MCU.</p>
+    </div>
+    <figure class="figure reveal"><img src="assets/architecture.svg" alt="Arquitectura del vending: navegador, FastAPI, Solana RPC, monitor y MCU" loading="lazy"><figcaption>docs/assets/architecture.svg · componentes y protocolos</figcaption></figure>
+    <div class="arch-points reveal"><div class="card"><h4>Backend sin estado crítico</h4><p>Las órdenes se persisten y el reference hace de idempotency key.</p></div><div class="card"><h4>El MCU no negocia</h4><p>El Linux le envía un comando de pulso; el sketch jamás manipula pagos.</p></div><div class="card"><h4>Todo por USB y systemd</h4><p>Despliegue con tar sobre ADB, servicio con límite de 700 MB.</p></div></div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">04 — Lo que lo hace distinto</div>
+      <h2>Decisiones de ingeniería</h2>
+      <p class="section-sub">Las decisiones que separan una demo bonita de una máquina que puede operar con dinero real.</p>
+    </div>
+    <div class="features reveal"><div class="feature"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Total calculado en el servidor</h3><p>El precio sale siempre de catalog.yaml. El navegador no puede alterar el monto ni inyectar SKUs.</p></div><div class="feature"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20v.01M17 20v.01M20 17v3h-3"/></svg></div><h3>QR sin amount</h3><p>El cliente digita el total exacto. El backend valida la transferencia contra el reference, no contra un número confiado.</p></div><div class="feature"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M16 4l4 4M14 6l3 3"/></svg></div><h3>Modelo pubkey-only</h3><p>La placa guarda solo la clave pública del comercio. No hay clave privada que extraer de la máquina.</p></div><div class="feature"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><h3>Idempotencia por reference</h3><p>Una orden no se dispensa dos veces aunque lleguen eventos duplicados o se reinicie el servicio.</p></div><div class="feature"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg></div><h3>MCU real, no GPIO emulado</h3><p>El pulso del relé lo genera el STM32U585 y lo expone arduino-router en 127.0.0.1:7500.</p></div><div class="feature"><div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></div><h3>Despliegue reproducible</h3><p>Tar por ADB, venv sin pip, wheels predescargadas y unidad systemd con memoria acotada.</p></div></div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">05 — Stack y arranque</div>
+      <h2>Con qué está construido</h2>
+      <p class="section-sub">Python en el MPU, firmware en el MCU y la cadena de Solana como fuente de verdad del pago.</p>
+    </div>
+    <div class="stack-grid">
+      <div class="reveal">
+        <p style="color:#9dabbf;font-size:14.5px">El negocio está en Python; la acción física, en el MCU. La cadena se consulta por WebSocket y se reconcilia por HTTP para no depender de un solo camino.</p>
+        <div class="chips"><span class="chip">Python 3.13.5</span><span class="chip">FastAPI</span><span class="chip">Uvicorn</span><span class="chip">Jinja2</span><span class="chip">solana-py</span><span class="chip">solders</span><span class="chip">WebSocket</span><span class="chip">PyYAML</span><span class="chip">Debian 13.2</span><span class="chip">systemd</span><span class="chip">ADB</span><span class="chip">STM32U585</span><span class="chip">Zephyr</span><span class="chip">Solana mainnet-beta</span><span class="chip">USDC SPL</span></div>
+        <div class="note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Probá primero en devnet. La configuración de producción usa mainnet-beta y USDC real: un error de monto o de red se paga con dinero.</span></div>
+      </div>
+      <div class="terminal reveal">
+        <div class="terminal-bar"><i></i><i></i><i></i><span>despliegue en la UNO Q</span></div>
+        <pre><span class="p">$</span> git clone https://github.com/wanderc137/vending-solana-unoq
+<span class="p">$</span> cd vending-solana-unoq
+<span class="p">$</span> cp .env.example .env          # wallet, red y dispenser
+<span class="p">$</span> bash scripts/setup_unoq.sh    # prepara el entorno en la placa
+<span class="p">$</span> bash scripts/deploy_unoq.sh --wheels
+<span class="p">$</span> adb shell sudo systemctl start vending-unoq</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gallery"><figure class="figure"><img src="assets/payment-flow.svg" alt="Secuencia del pago" loading="lazy"><figcaption>payment-flow.svg · del carrito al pulso del relé</figcaption></figure><figure class="figure"><img src="assets/deployment.svg" alt="Despliegue" loading="lazy"><figcaption>deployment.svg · MPU, MCU, puertos y systemd</figcaption></figure></div>
+
+<section class="section tight" id="docs">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">06 — Documentación</div>
+      <h2>Todo está escrito</h2>
+      <p class="section-sub">Cada decisión, cada límite y cada comando están documentados en el repositorio. Sin folletos: lo que funciona se muestra, lo que no, también.</p>
+    </div>
+    <div class="docs-grid reveal"><a class="doc-card" href="https://github.com/wanderc137/vending-solana-unoq/blob/main/docs/datasheet.md" target="_blank" rel="noopener"><span class="tag">Manual</span><h3>Datasheet</h3><p>Instalación, operación, catálogo, configuración y mantenimiento, con los códigos de error y el modelo de seguridad.</p><span class="arrow">Abrir documento <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a><a class="doc-card" href="https://github.com/wanderc137/vending-solana-unoq/blob/main/docs/developer.md" target="_blank" rel="noopener"><span class="tag">Código</span><h3>Guía de desarrollador</h3><p>Arquitectura módulo por módulo: app.py, payments.py, dispenser.py, mcu.py, wallet.py y los scripts.</p><span class="arrow">Abrir documento <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a><a class="doc-card" href="https://github.com/wanderc137/vending-solana-unoq/blob/main/docs/REFERENCES.md" target="_blank" rel="noopener"><span class="tag">Fuentes</span><h3>Referencias</h3><p>Solana Pay, SPL Token, solana-py, FastAPI, Arduino UNO Q y arduino-router, con el porqué de cada enlace.</p><span class="arrow">Abrir documento <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <div class="cta-card reveal">
+      <div class="kicker" style="justify-content:center">Portfolio · Arduino UNO Q</div>
+      <h2>¿Construimos algo así?</h2>
+      <p>Si te interesa integrar pagos cripto en hardware propio, automatizar una tienda o llevar una idea de cobro a una placa, hablemos. Este proyecto es la prueba de que se puede hacer con componentes reales.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/wanderc137" target="_blank" rel="noopener">Ver más proyectos <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="https://github.com/wanderc137/vending-solana-unoq" target="_blank" rel="noopener">Explorar el código</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand"><span class="brand-mark"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><circle cx="12" cy="12" r="2.5"/></svg></span>Vending Solana</div>
+        <p class="foot-p">Máquina expendedora con pagos USDC sobre Solana, construida sobre el Linux embebido y el MCU de la Arduino UNO Q.</p>
+      </div>
+      <div>
+        <h4>Este proyecto</h4>
+        <div class="foot-links">
+          <a href="https://github.com/wanderc137/vending-solana-unoq" target="_blank" rel="noopener">Repositorio en GitHub</a>
+          <a href="https://github.com/wanderc137/vending-solana-unoq/blob/main/README.md" target="_blank" rel="noopener">README técnico</a>
+          <a href="https://github.com/wanderc137/vending-solana-unoq/blob/main/docs/datasheet.md" target="_blank" rel="noopener">Datasheet</a>
+          <a href="https://github.com/wanderc137/vending-solana-unoq/blob/main/docs/developer.md" target="_blank" rel="noopener">Guía de desarrollador</a>
+          <a href="https://github.com/wanderc137/vending-solana-unoq/blob/main/docs/REFERENCES.md" target="_blank" rel="noopener">Referencias</a>
+        </div>
+      </div>
+      <div>
+        <h4>Otros proyectos</h4>
+        <div class="foot-links"><a href="https://wanderc137.github.io/UnoQ/">UNO Q Lab</a><a href="https://wanderc137.github.io/JarvisCAN/">JarvisCAN</a><a href="https://wanderc137.github.io/JarvisUNOQ/">JarvisUNOQ</a><a href="https://wanderc137.github.io/AnalizadorRostroUNOQ-v2/">AnalizadorRostro v2</a><a href="https://wanderc137.github.io/GestureCubeUNOQ/">GestureCube</a></div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 wanderc137 · Licencia MIT</span>
+      <span>Diseñado y construido sobre Arduino UNO Q</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pago confirmado</title>
+  <link rel="stylesheet" href="/static/style.css?v=20260912h">
+  <style>
+    /* Pantalla de celebración: agradecimiento GRANDE y con personalidad */
+    .celebration {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 32px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      top: -10px;
+      width: 12px;
+      height: 18px;
+      opacity: .9;
+      animation: fall linear infinite;
+      border-radius: 3px;
+    }
+    @keyframes fall {
+      0%   { transform: translateY(-30px) rotate(0deg); }
+      100% { transform: translateY(105vh) rotate(720deg); }
+    }
+    .big-emoji {
+      font-size: clamp(4.5rem, 12vw, 8rem);
+      line-height: 1;
+      margin-bottom: 8px;
+      animation: popIn .6s cubic-bezier(.2, 1.4, .4, 1) both;
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .bounce-emoji { display: inline-block; animation: bounce 1.4s ease infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      40%      { transform: translateY(-18px); }
+    }
+    .thanks {
+      font-size: clamp(2.4rem, 7vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(120deg, var(--mint) 20%, var(--violet-soft) 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 6px 0 10px;
+      text-transform: uppercase;
+    }
+    .thanks-sub {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      font-weight: 600;
+    }
+    .thanks-sub b { color: var(--mint); }
+    .dispensed-list {
+      list-style: none;
+      margin: 0 0 28px;
+      padding: 0;
+      max-width: 480px;
+      width: 100%;
+    }
+    .dispensed-list li {
+      background: rgba(153, 69, 255, .12);
+      border: 1px solid rgba(153, 69, 255, .3);
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .celebration .btn { font-size: 1.15rem; padding: 16px 42px; }
+    .celebration .countdown {
+      margin-top: 22px;
+      font-size: .9rem;
+      color: var(--text-dim);
+      opacity: .75;
+    }
+  </style>
+</head>
+<body>
+  <main class="celebration">
+    <!-- Confeti animado -->
+    <div id="confetti" style="position:absolute; inset:0; pointer-events:none;"></div>
+
+    <div class="big-emoji">🎉</div>
+    <div style="font-size: clamp(3rem, 8vw, 5rem); line-height:1;">🥤<span class="bounce-emoji" style="margin-left:14px;">🎊</span></div>
+    <h1 class="thanks">¡Gracias!</h1>
+    <p class="thanks-sub">Pago de <b>{{ "%.2f"|format(order.total_usdc) }} USDC</b> confirmado.<br>
+      {% if order.items|length == 1 %}
+      Retira tu {{ order.items[0].product_name | replace(" (lata", "") }}. ¡Que la disfrutes! 🙌
+      {% else %}
+      Retira tus {{ order.items|length }} bebidas. ¡Que las disfrutes! 🙌
+      {% endif %}
+    </p>
+    <ul class="dispensed-list">
+      {% for item in order.items %}
+      <li>{{ item.product_name }} · {{ "%.2f"|format(item.price_usdc) }} USDC</li>
+      {% endfor %}
+    </ul>
+
+    <a class="btn" href="/">Volver al catálogo</a>
+    <p class="countdown" id="countdown">Volviendo al catálogo en 15 s…</p>
+  </main>
+
+  <script>
+    // Confeti: 40 piezas con colores de la marca y caída aleatoria
+    const colors = ['#9945ff', '#14f195', '#ffffff', '#ff5d5d', '#b57bff', '#ffd700'];
+    const wrap = document.getElementById('confetti');
+    for (let i = 0; i < 40; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = (Math.random() * 100) + 'vw';
+      el.style.background = colors[i % colors.length];
+      el.style.animationDuration = (3 + Math.random() * 4) + 's';
+      el.style.animationDelay = (Math.random() * 3) + 's';
+      el.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      wrap.appendChild(el);
+    }
+
+    // Auto-redirección al catálogo en 15s (y limpiar carrito guardado)
+    localStorage.removeItem('vending_cart');
+    let s = 15;
+    const el = document.querySelector('#countdown');
+    const t = setInterval(() => {
+      s--;
+      if (s <= 0) { clearInterval(t); window.location.href = '/'; }
+      else el.textContent = `Volviendo al catálogo en ${s} s…`;
+    }, 1000);
+  </script>
+</body>
+</html>

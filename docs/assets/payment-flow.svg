@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 920" width="1240" height="920" role="img" aria-labelledby="title desc">
+  <title id="title">Secuencia de pago USDC en la máquina expendedora</title>
+  <desc id="desc">Diagrama de secuencia desde que el cliente elige bebidas hasta que el relé dispensa, incluyendo creación de orden, QR, firma, notificación WebSocket, validación y pulso del MCU.</desc>
+  <defs>
+    <marker id="seq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a93a8"/>
+    </marker>
+    <style>
+      .t { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+      .h1 { font-size: 25px; font-weight: 700; fill: #f2f2f7; }
+      .sub { font-size: 13.5px; fill: #9a9ab0; }
+      .part { font-size: 13px; font-weight: 700; fill: #f2f2f7; }
+      .role { font-size: 10.5px; fill: #9a9ab0; }
+      .msg { font-size: 11.5px; fill: #d7d7e3; }
+      .dim { font-size: 10.5px; fill: #7f8aa3; }
+      .num { font-size: 10px; font-weight: 700; fill: #07070b; }
+      .life { stroke: #262636; stroke-width: 1.2; stroke-dasharray: 4 5; }
+      .call { stroke: #8a93a8; stroke-width: 1.5; fill: none; }
+      .ret { stroke: #8a93a8; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; }
+    </style>
+  </defs>
+
+  <rect width="1240" height="920" fill="#07070b"/>
+  <text class="t h1" x="44" y="50">Secuencia de pago — de la elección al relé</text>
+  <text class="t sub" x="44" y="76">Camino feliz con un solo producto. Tiempos de referencia: detección &lt; 2 s, pulso 2,5 s.</text>
+
+  <!-- Participantes -->
+  <g>
+    <rect x="20" y="88" width="140" height="64" rx="10" fill="#0d1726" stroke="#2c4a6b"/>
+    <text class="t part" x="36" y="116">Cliente</text>
+    <text class="t role" x="36" y="136">Phantom · navegador</text>
+
+    <rect x="185" y="88" width="130" height="64" rx="10" fill="#171226" stroke="#4a3670"/>
+    <text class="t part" x="201" y="116">UI kiosco</text>
+    <text class="t role" x="201" y="136">Jinja + JS</text>
+
+    <rect x="345" y="88" width="170" height="64" rx="10" fill="#0d1f19" stroke="#1f5f4a"/>
+    <text class="t part" x="361" y="116">Backend</text>
+    <text class="t role" x="361" y="136">FastAPI + app.py</text>
+
+    <rect x="545" y="88" width="150" height="64" rx="10" fill="#171226" stroke="#4a3670"/>
+    <text class="t part" x="561" y="116">Solana RPC</text>
+    <text class="t role" x="561" y="136">mainnet-beta</text>
+
+    <rect x="715" y="88" width="150" height="64" rx="10" fill="#0d1726" stroke="#2c4a6b"/>
+    <text class="t part" x="731" y="116">Monitor</text>
+    <text class="t role" x="731" y="136">payments.py</text>
+
+    <rect x="885" y="88" width="150" height="64" rx="10" fill="#1f180d" stroke="#6b542c"/>
+    <text class="t part" x="901" y="116">MCU</text>
+    <text class="t role" x="901" y="136">STM32U585 · D7</text>
+
+    <rect x="1055" y="88" width="150" height="64" rx="10" fill="#0d1f19" stroke="#1f5f4a"/>
+    <text class="t part" x="1071" y="116">Relé</text>
+    <text class="t role" x="1071" y="136">carga 5 V</text>
+  </g>
+
+  <!-- Líneas de vida -->
+  <g class="life">
+    <line x1="90" y1="152" x2="90" y2="800"/>
+    <line x1="250" y1="152" x2="250" y2="800"/>
+    <line x1="430" y1="152" x2="430" y2="800"/>
+    <line x1="620" y1="152" x2="620" y2="800"/>
+    <line x1="790" y1="152" x2="790" y2="800"/>
+    <line x1="960" y1="152" x2="960" y2="800"/>
+    <line x1="1130" y1="152" x2="1130" y2="800"/>
+  </g>
+
+  <!-- 1 -->
+  <line class="call" x1="90" y1="200" x2="246" y2="200" marker-end="url(#seq)"/>
+  <text class="t msg" x="96" y="192">1. Elige bebidas (máx. 1 por SKU)</text>
+
+  <!-- 2 -->
+  <line class="call" x1="250" y1="245" x2="426" y2="245" marker-end="url(#seq)"/>
+  <text class="t msg" x="256" y="237">2. POST /order {items[]}</text>
+
+  <!-- 3 self -->
+  <path class="call" d="M430,285 h34 v26 h-34" marker-end="url(#seq)"/>
+  <text class="t msg" x="472" y="284">3. Recalcula el total en servidor</text>
+  <text class="t dim" x="472" y="300">crea reference · genera QR PNG</text>
+
+  <!-- 4 -->
+  <line class="ret" x1="430" y1="340" x2="254" y2="340" marker-end="url(#seq)"/>
+  <text class="t msg" x="300" y="332">4. order_id · transfer_request · QR</text>
+
+  <!-- 5 -->
+  <line class="call" x1="90" y1="390" x2="616" y2="390" marker-end="url(#seq)"/>
+  <text class="t msg" x="96" y="382">5. Firma transfer_checked con la reference</text>
+  <text class="t dim" x="96" y="406">la wallet habla directo con la red; el navegador no firma nada</text>
+
+  <!-- 6 -->
+  <line class="ret" x1="620" y1="440" x2="786" y2="440" marker-end="url(#seq)"/>
+  <text class="t msg" x="626" y="432">6. Notificación de la ATA (WebSocket)</text>
+
+  <!-- 7 -->
+  <line class="ret" x1="790" y1="478" x2="624" y2="478" marker-end="url(#seq)"/>
+  <text class="t msg" x="632" y="470">7. getTransaction (jsonParsed)</text>
+
+  <!-- 8 -->
+  <line class="call" x1="790" y1="520" x2="434" y2="520" marker-end="url(#seq)"/>
+  <text class="t msg" x="470" y="512">8. _on_payment(Payment)</text>
+
+  <!-- 9 self -->
+  <path class="call" d="M430,558 h34 v26 h-34" marker-end="url(#seq)"/>
+  <text class="t msg" x="472" y="557">9. Valida monto ±0,01 USDC y reference</text>
+  <text class="t dim" x="472" y="573">descarta tx fallidas · marca pagada</text>
+
+  <!-- 10 -->
+  <line class="call" x1="430" y1="630" x2="956" y2="630" marker-end="url(#seq)"/>
+  <text class="t msg" x="440" y="622">10. WRITE 7 1 · TCP 127.0.0.1:7500</text>
+  <text class="t dim" x="440" y="646">mcu.py reutiliza un socket por comando (~70 ms)</text>
+
+  <!-- 11 -->
+  <line class="call" x1="960" y1="680" x2="1126" y2="680" marker-end="url(#seq)"/>
+  <text class="t msg" x="966" y="672">11. D7 HIGH durante 2,5 s</text>
+
+  <!-- 12 -->
+  <line class="ret" x1="1130" y1="712" x2="964" y2="712" marker-end="url(#seq)"/>
+  <text class="t msg" x="972" y="704">12. D7 LOW (finally)</text>
+
+  <!-- 13 -->
+  <line class="ret" x1="250" y1="748" x2="426" y2="748" marker-end="url(#seq)"/>
+  <text class="t msg" x="256" y="740">13. GET /order/{id} (poll 1,5 s)</text>
+
+  <!-- 14 -->
+  <line class="ret" x1="430" y1="780" x2="254" y2="780" marker-end="url(#seq)"/>
+  <text class="t msg" x="300" y="772">14. status = dispensada</text>
+
+  <!-- Notas -->
+  <rect x="40" y="824" width="1160" height="72" rx="12" fill="#0d0d15" stroke="#262636"/>
+  <text class="t dim" x="60" y="850">El QR se emite SIN amount y SIN label/message a propósito: algunas versiones de Phantom interpretan mal el monto en unidades base y muestran cifras absurdas.</text>
+  <text class="t dim" x="60" y="872">La reference (pubkey única de 32 bytes) viaja en la transacción; el monitor la busca en account_keys y, si no aparece, cae al emparejamiento por monto con la orden pendiente más antigua.</text>
+</svg>

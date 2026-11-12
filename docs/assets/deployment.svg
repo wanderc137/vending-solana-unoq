@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 860" width="1280" height="860" role="img" aria-labelledby="title desc">
+  <title id="title">Despliegue en Arduino UNO Q</title>
+  <desc id="desc">Diagrama de despliegue: PC con adb y pip, placa UNO Q con MPU Linux y MCU, servicio systemd, puertos y conexión al relé y a Solana.</desc>
+  <defs>
+    <marker id="dep" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a93a8"/>
+    </marker>
+    <marker id="dep-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#14f195"/>
+    </marker>
+    <marker id="dep-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b57bff"/>
+    </marker>
+    <style>
+      .t { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+      .h1 { font-size: 25px; font-weight: 700; fill: #f2f2f7; }
+      .sub { font-size: 13.5px; fill: #9a9ab0; }
+      .zone { font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+      .mod { font-size: 13.5px; font-weight: 700; fill: #f2f2f7; }
+      .small { font-size: 11px; fill: #9a9ab0; }
+      .tiny { font-size: 10.5px; fill: #7f8aa3; }
+      .link { stroke: #8a93a8; stroke-width: 1.6; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="860" fill="#07070b"/>
+  <text class="t h1" x="44" y="50">Despliegue — qué corre en cada lado del USB</text>
+  <text class="t sub" x="44" y="76">La placa no necesita internet para instalarse: las ruedas viajan por ADB y systemd levanta el servicio al arrancar.</text>
+
+  <!-- PC -->
+  <rect x="40" y="110" width="290" height="640" rx="16" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="60" y="140" fill="#5aa9ff">PC DE DESARROLLO</text>
+  <text class="t small" x="60" y="164">Linux/macOS · Python 3.13 · adb</text>
+
+  <rect x="60" y="188" width="250" height="62" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="74" y="212">1 · Preparar ruedas</text>
+  <text class="t tiny" x="74" y="232">pip download --platform …aarch64</text>
+
+  <rect x="60" y="266" width="250" height="62" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="74" y="290">2 · Empujar el código</text>
+  <text class="t tiny" x="74" y="310">deploy_unoq.sh --wheels</text>
+
+  <rect x="60" y="344" width="250" height="62" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="74" y="368">3 · Instalar dentro</text>
+  <text class="t tiny" x="74" y="388">setup_unoq.sh --systemd</text>
+
+  <rect x="60" y="422" width="250" height="62" rx="10" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="74" y="446">4 · Operar el kiosco</text>
+  <text class="t tiny" x="74" y="466">http://&lt;IP-de-la-placa&gt;:8000</text>
+
+  <rect x="60" y="500" width="250" height="62" rx="10" fill="#1a150d" stroke="#5a4620"/>
+  <text class="t mod" x="74" y="524">Solo laboratorio</text>
+  <text class="t tiny" x="74" y="544">devnet_tunnel.sh · adb reverse</text>
+
+  <text class="t tiny" x="60" y="600">adb devices debe listar el serial</text>
+  <text class="t mono tiny" x="60" y="618">2480682956</text>
+  <text class="t tiny" x="60" y="646">El deploy reinicia el servicio y</text>
+  <text class="t tiny" x="60" y="664">muestra /healthz al terminar.</text>
+  <text class="t tiny" x="60" y="696">Backend alternativo: Raspberry Pi</text>
+  <text class="t tiny" x="60" y="714">con requirements-pi.txt (gpiozero).</text>
+
+  <!-- enlace USB -->
+  <line class="link" x1="312" y1="240" x2="396" y2="240" marker-end="url(#dep)"/>
+  <text class="t tiny" x="318" y="226">USB-C · ADB</text>
+  <text class="t tiny" x="318" y="258">tar + push</text>
+
+  <!-- UNO Q -->
+  <rect x="400" y="110" width="600" height="700" rx="18" fill="#0d0d15" stroke="#2b3b36"/>
+  <text class="t zone" x="420" y="140" fill="#14f195">ARDUINO UNO Q</text>
+  <text class="t small" x="420" y="164">1,7 GiB RAM · 9,8 GB eMMC · hostname x11</text>
+
+  <!-- MPU -->
+  <rect x="420" y="182" width="560" height="300" rx="12" fill="#0f1412" stroke="#1f5f4a"/>
+  <text class="t zone" x="438" y="208" fill="#14f195">MPU · LINUX</text>
+  <text class="t small" x="962" y="208" text-anchor="end">Debian 13.2 · Python 3.13.5 · aarch64</text>
+
+  <rect x="438" y="222" width="165" height="72" rx="9" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="452" y="246">systemd</text>
+  <text class="t tiny" x="452" y="264">vending-unoq.service</text>
+  <text class="t tiny" x="452" y="280">Restart=always · 700M</text>
+
+  <rect x="615" y="222" width="165" height="72" rx="9" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="629" y="246">uvicorn</text>
+  <text class="t tiny" x="629" y="264">0.0.0.0:8000</text>
+  <text class="t tiny" x="629" y="280">--workers 1</text>
+
+  <rect x="792" y="222" width="170" height="72" rx="9" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="806" y="246">.venv + wheels/</text>
+  <text class="t tiny" x="806" y="264">offline · --no-index</text>
+  <text class="t tiny" x="806" y="280">sin pip del sistema</text>
+
+  <rect x="438" y="310" width="165" height="72" rx="9" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="452" y="334">app.py</text>
+  <text class="t tiny" x="452" y="352">FastAPI + Jinja2</text>
+  <text class="t tiny" x="452" y="368">órdenes · QR · API</text>
+
+  <rect x="615" y="310" width="165" height="72" rx="9" fill="#111b18" stroke="#1f5f4a"/>
+  <text class="t mod" x="629" y="334">arduino-router</text>
+  <text class="t tiny" x="629" y="352">TCP 127.0.0.1:7500</text>
+  <text class="t tiny" x="629" y="368">monitor del MCU</text>
+
+  <rect x="792" y="310" width="170" height="72" rx="9" fill="#14141f" stroke="#2e2e44"/>
+  <text class="t mod" x="806" y="334">LEDs sysfs</text>
+  <text class="t tiny" x="806" y="352">green · blue · red</text>
+  <text class="t tiny" x="806" y="368">/sys/class/leds</text>
+
+  <text class="t tiny" x="438" y="418">Órdenes, referencias y pagos viven en memoria: un reinicio las pierde.</text>
+  <text class="t tiny" x="438" y="438">El puerto 8000 queda expuesto en la red local; no hay autenticación de kiosco.</text>
+  <text class="t tiny" x="438" y="458">Código en /home/arduino/vending-solana-unoq · usuario arduino (sudo sin clave).</text>
+
+  <!-- enlace MPU -> MCU -->
+  <line class="link" x1="700" y1="484" x2="700" y2="514" marker-end="url(#dep-mint)"/>
+  <text class="t tiny" x="712" y="504">/dev/ttyHS1 · 115200 baud</text>
+
+  <!-- MCU -->
+  <rect x="420" y="516" width="560" height="180" rx="12" fill="#1a150d" stroke="#5a4620"/>
+  <text class="t zone" x="438" y="542" fill="#ffb86b">MCU · STM32U585 · ZEPHYR RTOS</text>
+  <text class="t small" x="438" y="568">firmware/unoq_gpio_control.ino · se flashea por App Lab / USB</text>
+  <text class="t small" x="438" y="592">Protocolo ASCII: READ · WRITE · ANALOG · PWM · MATRIX · TEMP</text>
+  <text class="t small" x="438" y="616">Pines 0–19: D0–D13 digitales · A0–A5 = 14–19 analógicos</text>
+  <text class="t small" x="438" y="640">Al arrancar deja todos los pines en INPUT y avisa “UNOQ_GPIO_READY”.</text>
+  <text class="t tiny" x="438" y="666">El header no está expuesto al Linux: solo se llega por el router.</text>
+
+  <!-- Solana -->
+  <rect x="1030" y="180" width="220" height="160" rx="14" fill="#0d0d15" stroke="#3a2a55"/>
+  <text class="t zone" x="1048" y="208" fill="#b57bff">SOLANA</text>
+  <text class="t mod" x="1048" y="236">mainnet-beta</text>
+  <text class="t tiny" x="1048" y="258">RPC HTTPS</text>
+  <text class="t tiny" x="1048" y="276">WSS account_subscribe</text>
+  <text class="t tiny" x="1048" y="300">USDC · 6 decimales</text>
+  <text class="t tiny" x="1048" y="318">El saldo vive en la ATA.</text>
+
+  <line class="link" x1="982" y1="310" x2="1026" y2="310" marker-end="url(#dep-violet)"/>
+  <text class="t tiny" x="986" y="302">HTTPS</text>
+
+  <!-- Relé -->
+  <rect x="1030" y="520" width="220" height="110" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="1048" y="548" fill="#14f195">RELÉ</text>
+  <text class="t small" x="1048" y="572">Módulo optoacoplado</text>
+  <text class="t small" x="1048" y="592">IN ← D7 · VCC 5 V · GND</text>
+  <text class="t tiny" x="1048" y="614">Activo-alto por defecto</text>
+
+  <!-- Carga -->
+  <rect x="1030" y="650" width="220" height="90" rx="14" fill="#0d0d15" stroke="#262636"/>
+  <text class="t zone" x="1048" y="678" fill="#9a9ab0">CARGA</text>
+  <text class="t small" x="1048" y="702">Motor / electroválvula 5 V</text>
+  <text class="t tiny" x="1048" y="724">Fuente externa · diodo de rueda libre</text>
+
+  <line class="link" x1="982" y1="580" x2="1026" y2="580" marker-end="url(#dep-mint)"/>
+
+  <!-- Pie -->
+  <text class="t tiny" x="44" y="832">Puertos: 8000 HTTP (LAN) · 7500 TCP (loopback, arduino-router) · /dev/ttyHS1 (MPU↔MCU) · USB-C (ADB y flasheo).</text>
+  <text class="t tiny" x="44" y="848">En la unidad de prueba la red inalámbrica estaba en RMA: el servicio funcionaba, pero el RPC no era alcanzable. Ver informe interno de RMA.</text>
+</svg>
