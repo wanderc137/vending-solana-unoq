@@ -640,10 +640,10 @@ Solo cifras medidas. Lo no medido se declara como objetivo.
 La página del proyecto incluye una sección de comunidad con tres piezas:
 
 - **FAQ específica** del vending: clave privada, mainnet/devnet, relé, catálogo, WiFi en RMA y pruebas.
-- **Preguntas**: un formulario que arma una discusión en GitHub Discussions (categoría Q&A) con nombre o pseudónimo y el texto. Requiere cuenta de GitHub para publicar.
-- **Monedas anónimas**: un contador global sin usuario asociado, implementado con [Abacus](https://abacus.jasoncameron.dev/). No usa Issues porque un issue siempre queda vinculado a una cuenta; el contador no guarda identidad. Hay un límite de una moneda por navegador cada 24 h.
+- **Preguntas**: un formulario que envía la consulta por correo a `wander.c137@protonmail.com`, sin cuenta de GitHub y con nombre o pseudónimo opcional. También incluye un enlace opcional para publicarla en Discussions si la persona prefiere que quede pública.
+- **Monedas anónimas**: un contador global sin usuario asociado, implementado con [Abacus](https://abacus.jasoncameron.dev/). No usa Issues porque un issue siempre queda vinculado a una cuenta; el contador no guarda identidad. Se pueden regalar varias monedas, con un bloqueo breve entre clics para evitar dobles envíos.
 
-Las notificaciones de Discussions llegan al owner según la configuración de GitHub. Para un correo dedicado con GitHub Actions hace falta agregar un workflow con credenciales SMTP y el scope `workflow`; el repositorio no lo incluye para no publicar secretos ni un workflow que falle sin configuración.
+El correo se abre en el cliente de la persona visitante; no se publica ni se comparte con GitHub. Para un envío totalmente automático sin cliente de correo haría falta un backend pequeño (por ejemplo, un Worker con un proveedor de email) con su token del lado servidor.
 
 ---
 

@@ -1,4 +1,4 @@
-/* Comunidad del proyecto: FAQ, preguntas a Discussions y monedas anónimas. */
+/* Comunidad del proyecto: FAQ, preguntas por correo y monedas anónimas. */
 (() => {
   "use strict";
 
@@ -9,24 +9,30 @@
   const coinNamespace = CFG.coinNamespace || `${account}-${repo}`;
   const coinApi = (CFG.coinApi || "https://abacus.jasoncameron.dev").replace(/\/$/, "");
   const faqs = Array.isArray(CFG.faqs) ? CFG.faqs : [];
-  const COOLDOWN_MS = 24 * 60 * 60 * 1000;
-  const STORE_KEY = `psc-coin-${account}-${repo}`;
+  const contactEmail = CFG.contactEmail || "wander.c137@protonmail.com";
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
   }[c]));
 
+  const questionText = (name, question) => [
+    `Pregunta de: ${name || "Anónimo"}`,
+    "",
+    question.trim(),
+    "",
+    "---",
+    `Enviada desde ${location.origin}${location.pathname}`,
+  ].join("\n");
+
+  const mailtoUrl = (name, question) => {
+    const subject = `Pregunta anónima · ${repo}`;
+    return `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(questionText(name, question))}`;
+  };
+
   const discussionUrl = (name, question) => {
     const clean = question.trim().replace(/\r/g, "");
     const title = clean.replace(/\s+/g, " ").slice(0, 92);
-    const body = [
-      `**Pregunta de:** ${name || "Anónimo"}`,
-      "",
-      clean,
-      "",
-      "---",
-      `_Enviada desde la página de ${repo}._`,
-    ].join("\n");
+    const body = questionText(name, clean);
     return `https://github.com/${account}/${repo}/discussions/new?category=${encodeURIComponent(category)}&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
   };
 
@@ -57,7 +63,7 @@
       <div class="psc-grid">
         <div class="psc-card">
           <h3>Dejá tu pregunta</h3>
-          <p class="psc-sub">Se abre GitHub Discussions con el texto precargado. Necesitás una cuenta de GitHub para publicarla; si no tenés, podés copiar el texto y enviarlo por otro canal.</p>
+          <p class="psc-sub">Se envía por correo a <strong>${esc(contactEmail)}</strong>. No hace falta cuenta de GitHub: podés firmar con un pseudónimo o dejar el nombre vacío.</p>
           <form id="psc-form" novalidate>
             <div class="psc-field">
               <label for="psc-name">Nombre o pseudónimo <span>opcional</span></label>
@@ -70,6 +76,7 @@
             <div class="psc-form-foot">
               <span class="psc-count" id="psc-count">0 / 1200</span>
               <div class="psc-actions">
+                <button class="psc-btn" type="button" id="psc-copy">Copiar</button>
                 <button class="psc-btn" type="button" id="psc-clear">Limpiar</button>
                 <button class="psc-btn primary" type="submit" id="psc-send">Enviar pregunta
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -77,7 +84,7 @@
               </div>
             </div>
             <p class="psc-status" id="psc-status" role="status" aria-live="polite"></p>
-            <p class="psc-note">La pregunta se publica en <a href="https://github.com/${account}/${repo}/discussions" target="_blank" rel="noopener">GitHub Discussions</a>. El repositorio puede notificarte por correo cuando se crea una discusión nueva.</p>
+            <p class="psc-note">Por defecto no se publica en GitHub: va por correo. Si preferís que quede pública, <a href="https://github.com/${account}/${repo}/discussions" target="_blank" rel="noopener">publicala en GitHub Discussions</a>.</p>
           </form>
         </div>
 
@@ -92,10 +99,10 @@
             <div class="psc-coin-count" id="psc-coin-count" aria-live="polite">—</div>
             <div class="psc-coin-label" id="psc-coin-title">monedas anónimas</div>
           </div>
-          <p class="psc-coin-copy">No es una estrella: no queda asociada a tu usuario. Es un contador global y anónimo para reconocer el proyecto.</p>
+          <p class="psc-coin-copy">No es una estrella: no queda asociada a tu usuario. Es un contador global y anónimo para reconocer el proyecto. Podés regalar varias.</p>
           <button class="psc-btn primary psc-coin-btn" type="button" id="psc-coin-btn">Regalar 1 moneda</button>
           <p class="psc-coin-msg" id="psc-coin-msg" role="status" aria-live="polite">Cargando el contador…</p>
-          <p class="psc-coin-small">Una moneda por navegador cada 24 h. <strong>Sin cuenta, sin correo, sin tracking.</strong></p>
+          <p class="psc-coin-small">Cada clic suma una moneda. <strong>Sin cuenta, sin correo, sin tracking.</strong></p>
         </aside>
       </div>
     </div>`;
@@ -112,6 +119,7 @@
   const count = section.querySelector("#psc-count");
   const status = section.querySelector("#psc-status");
   const clear = section.querySelector("#psc-clear");
+  const copy = section.querySelector("#psc-copy");
   const send = section.querySelector("#psc-send");
   const coinCount = section.querySelector("#psc-coin-count");
   const coinBtn = section.querySelector("#psc-coin-btn");
@@ -146,20 +154,24 @@
       questionInput.focus();
       return;
     }
-    const url = discussionUrl(name, question);
-    const win = window.open(url, "_blank", "noopener,noreferrer");
-    if (win) {
-      setStatus("Abrimos GitHub Discussions con tu pregunta precargada. Revisala y publicala.", "ok");
-    } else {
-      setStatus("El navegador bloqueó la ventana. Abrí GitHub Discussions manualmente.", "bad");
-      const link = document.createElement("a");
-      link.href = url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = " Abrir la pregunta en GitHub →";
-      link.style.color = "var(--accent)";
-      link.style.textDecoration = "underline";
-      status.appendChild(link);
+    const url = mailtoUrl(name, question);
+    window.location.href = url;
+    setStatus(`Abrimos tu cliente de correo con la pregunta. Revisala y enviála a ${contactEmail}. Si no se abrió, usá «Copiar».`, "ok");
+  });
+
+  copy.addEventListener("click", async () => {
+    const question = questionInput.value.trim();
+    if (question.length < 8) {
+      setStatus("Escribí una pregunta un poco más completa (mínimo 8 caracteres).", "bad");
+      questionInput.focus();
+      return;
+    }
+    const text = `${questionText(nameInput.value.trim(), question)}\n\nPara: ${contactEmail}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus("Pregunta copiada. Pegala en un correo a " + contactEmail + ".", "ok");
+    } catch {
+      setStatus("No se pudo copiar automáticamente. Seleccioná el texto y copialo a mano.", "bad");
     }
   });
 
@@ -171,39 +183,6 @@
   const formatCoins = (n) => {
     try { return new Intl.NumberFormat("es-CL").format(n); }
     catch { return String(n); }
-  };
-
-  const readCooldown = () => {
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return 0;
-      const ts = Number(JSON.parse(raw).ts || 0);
-      return Number.isFinite(ts) ? ts : 0;
-    } catch { return 0; }
-  };
-
-  const writeCooldown = () => {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ ts: Date.now() })); }
-    catch { /* modo privado del navegador */ }
-  };
-
-  const cooldownLeft = () => {
-    const elapsed = Date.now() - readCooldown();
-    return elapsed < COOLDOWN_MS ? COOLDOWN_MS - elapsed : 0;
-  };
-
-  const applyCooldown = () => {
-    const left = cooldownLeft();
-    if (!left) {
-      coinBtn.disabled = false;
-      coinBtn.textContent = "Regalar 1 moneda";
-      return false;
-    }
-    const hours = Math.max(1, Math.ceil(left / 3600000));
-    coinBtn.disabled = true;
-    coinBtn.textContent = `Gracias · volvé en ${hours} h`;
-    setCoinMessage("Ya regalaste una moneda desde este navegador. Gracias por el gesto.", "ok");
-    return true;
   };
 
   const loadCoins = async () => {
@@ -225,8 +204,10 @@
     }
   };
 
+  let coinBusy = false;
   coinBtn.addEventListener("click", async () => {
-    if (applyCooldown()) return;
+    if (coinBusy) return;
+    coinBusy = true;
     coinBtn.disabled = true;
     setCoinMessage("Registrando tu moneda…");
     try {
@@ -235,19 +216,22 @@
       const data = await res.json();
       if (typeof data.value !== "number") throw new Error("respuesta inválida");
       coinCount.textContent = formatCoins(data.value);
-      writeCooldown();
       setCoinMessage("Moneda registrada. Gracias por reconocer el proyecto.", "ok");
-      coinBtn.textContent = "Gracias · volvé en 24 h";
+      coinBtn.textContent = "Regalar otra moneda";
       coinCount.animate(
         [{ transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }],
         { duration: 420, easing: "ease-out" }
       );
     } catch {
-      coinBtn.disabled = false;
       setCoinMessage("No pudimos registrar la moneda. Revisá la conexión e intentá otra vez.", "bad");
+    } finally {
+      setTimeout(() => {
+        coinBusy = false;
+        coinBtn.disabled = false;
+        if (coinBtn.textContent !== "Regalar otra moneda") coinBtn.textContent = "Regalar 1 moneda";
+      }, 1100);
     }
   });
 
-  applyCooldown();
   loadCoins();
 })();
