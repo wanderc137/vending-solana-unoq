@@ -635,7 +635,19 @@ Solo cifras medidas. Lo no medido se declara como objetivo.
 
 ---
 
-## 17. Referencias
+## 17. Comunidad y reconocimiento
+
+La página del proyecto incluye una sección de comunidad con tres piezas:
+
+- **FAQ específica** del vending: clave privada, mainnet/devnet, relé, catálogo, WiFi en RMA y pruebas.
+- **Preguntas**: un formulario que arma una discusión en GitHub Discussions (categoría Q&A) con nombre o pseudónimo y el texto. Requiere cuenta de GitHub para publicar.
+- **Monedas anónimas**: un contador global sin usuario asociado, implementado con [Abacus](https://abacus.jasoncameron.dev/). No usa Issues porque un issue siempre queda vinculado a una cuenta; el contador no guarda identidad. Hay un límite de una moneda por navegador cada 24 h.
+
+Las notificaciones de Discussions llegan al owner según la configuración de GitHub. Para un correo dedicado con GitHub Actions hace falta agregar un workflow con credenciales SMTP y el scope `workflow`; el repositorio no lo incluye para no publicar secretos ni un workflow que falle sin configuración.
+
+---
+
+## 18. Referencias
 
 Lista ampliada con una línea por enlace: [`docs/REFERENCES.md`](docs/REFERENCES.md).
 
@@ -649,10 +661,10 @@ Lista ampliada con una línea por enlace: [`docs/REFERENCES.md`](docs/REFERENCES
 
 ---
 
-## 18. Licencia y autor
+## 19. Licencia y autor
 
 Distribuido bajo licencia **MIT** (Copyright (c) 2026 wanderc137). Consulta [`LICENSE`](LICENSE).
 
 **Autor:** [github.com/wanderc137](https://github.com/wanderc137)
 
-Si te sirve para aprender, montar un kiosco o evaluar la UNO Q, abre un issue con tus hallazgos. Las limitaciones están a la vista: un portfolio honesto vale más que una demo que las esconde.
+Si te sirve para aprender, montar un kiosco o evaluar la UNO Q, abrí una discusión en Q&A con tus hallazgos. Las limitaciones están a la vista: un portfolio honesto vale más que una demo que las esconde.
