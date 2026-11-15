@@ -667,3 +667,55 @@ Distribuido bajo licencia **MIT** (Copyright (c) 2026 wanderc137). Consulta [`LI
 **Autor:** [github.com/wanderc137](https://github.com/wanderc137)
 
 Si te sirve para aprender, montar un kiosco o evaluar la UNO Q, abrí una discusión en Q&A con tus hallazgos. Las limitaciones están a la vista: un portfolio honesto vale más que una demo que las esconde.
+
+## Ficha de evaluación
+
+**Madurez global: 4.3/5**
+
+| Criterio | Nota | Evidencia |
+|---|---:|---|
+| Madurez | 4/5 | Tres pagos mainnet reales, servicio systemd activo y auditoría sin incidencias. No hay suite de tests automatizados ni persistencia de órdenes, y solo se usa un motor en D7. |
+| Reproducibilidad | 4/5 | Instalación offline con wheels cp313/aarch64, scripts de despliegue y configuración jerárquica. Depende de ADB, del serial de la unidad y de una red con acceso al RPC. |
+| Documentación | 5/5 | README, datasheet de 498 líneas, developer, BITACORA, referencias y runbook cubren instalación, estados, validaciones, mantenimiento y deuda técnica con cifras. |
+| Honestidad de límites | 5/5 | Declara el E2E en devnet no ejecutado, el WiFi en RMA, el error heredado de sales.py, las órdenes en memoria y las latencias no medidas. |
+| Valor demostrativo | 5/5 | Demuestra un cobro real en mainnet-beta con validación de destino, monto y reference, y un pulso de relé gobernado por el MCU, sin clave privada en la placa. |
+| Facilidad de despliegue | 3/5 | Exige preparar wheels en otro equipo, flashear el sketch Zephyr, desplegar por ADB y cablear el relé con fuente externa. Los scripts ayudan, pero el montaje no es trivial. |
+
+Sirve como implementación de referencia para cobrar USDC con Solana Pay en hardware embebido y para estudiar la separación entre MPU, MCU y cadena. La limitación que más pesa es operativa: sin persistencia, sin stock y con una unidad de prueba sin WiFi, el E2E en devnet quedó sin verificar.
+
+## Lo que no funcionó
+
+### Migración v2 · GPIO — El header no estaba expuesto al Linux
+
+libgpiod sobre gpiochip1 y gpiochip2 no movía ningún pin del conector porque son pinctrl internos del MPU. Se descartó el GPIO de Linux y se usó el monitor TCP 127.0.0.1:7500 de arduino-router hacia el sketch del STM32U585.
+
+### Migración v2 · entorno — Python sin pip y sin red
+
+La imagen no trae pip ni ensurepip, y la placa no tenía ruta a internet. Se creó el venv con --without-pip, se bootstrapeó pip desde una rueda local y se instalaron wheels cp313/aarch64 por ADB.
+
+### v1.0 · pagos — Transacciones v0 y transacciones fallidas
+
+Una tx v0 no validaba el destino porque faltaba concatenar las cuentas de lookup tables, y una tx con meta.err parecía un pago. Se corrigió _account_keys y validate_payment_tx ahora exige meta.err nulo.
+
+### v1.0 · hardware — WiFi muerto a nivel de módulo
+
+El WCN3990 funcionó unos segundos y crasheó con errores de calibración RF; no se recuperó con ciclos de energía, reflasheo ni otra fuente. Se preparó el informe de RMA y el servicio siguió activo sin red, con healthz honesto en rpc_ok: false.
+
+## Preguntas típicas
+
+**¿Qué es Vending Solana USDC?**
+
+Es una máquina expendedora de referencia que cobra USDC en Solana y dispensa con un relé gobernado por el MCU de la UNO Q. Incluye kiosco web, backend FastAPI, monitor de pagos y firmware del STM32U585.
+
+**¿Qué no hace?**
+
+No es un terminal certificado, no controla stock, no persiste órdenes y no reembolsa automáticamente. Tampoco firma en la placa: solo guarda la pubkey del comercio y valida pagos.
+
+**¿Cómo se ejecuta o despliega?**
+
+Se preparan las wheels en un PC, se flashea firmware/unoq_gpio_control.ino y se ejecuta scripts/deploy_unoq.sh --wheels por ADB; dentro de la placa, setup_unoq.sh --systemd instala el servicio en el puerto 8000.
+
+**¿Qué se puede reutilizar?**
+
+La validación de transferencias SPL con reference y tolerancia, el cliente TCP al monitor del MCU y la abstracción de dispensador con fail-safe. También el esquema pubkey-only y la instalación offline con wheels.
+
