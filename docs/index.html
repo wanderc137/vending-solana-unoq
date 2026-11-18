@@ -290,7 +290,8 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 .concept-side p{font-size:13px;margin:6px 0 16px}
 @media(max-width:760px){.concept-grid,.fail-grid{grid-template-columns:1fr}.concept-side{border-left:0;padding-left:0}}
 
-</style><link href="assets/community.css?v=5" rel="stylesheet"/></head>
+</style><link href="assets/community.css?v=5" rel="stylesheet"/><link href="rec/player.css?v=1" rel="stylesheet"/>
+</head>
 <body style="--accent:#14F195;--accent2:#9945FF">
 <div class="grid-overlay"></div>
 <div class="glow one"></div>
@@ -305,6 +306,7 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 <a href="#problema">Visión</a>
 <a href="#como">Cómo funciona</a>
 <a href="#arquitectura">Arquitectura</a>
+<a href="#video">Video</a>
 <a href="#docs">Documentación</a>
 <a href="#comunidad">Comunidad</a>
 <a class="btn btn-ghost" href="https://github.com/wanderc137/vending-solana-unoq" rel="noopener" style="padding:9px 15px" target="_blank">GitHub</a>
@@ -363,6 +365,45 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 <div class="timeline reveal"><div class="step"><div class="step-num">01</div><div class="step-body"><h3>El cliente arma el carrito</h3><p>Hasta ocho SKUs distintos, una unidad por producto, con el total siempre visible en la pantalla.</p></div></div><div class="step"><div class="step-num">02</div><div class="step-body"><h3>El backend crea la orden</h3><p>Valida los SKU y recalcula el total desde catalog.yaml. El navegador nunca decide el monto.</p></div></div><div class="step"><div class="step-num">03</div><div class="step-body"><h3>Aparece el QR de Solana Pay</h3><p>El QR lleva wallet, mint de USDC y un reference único, pero no el monto: el cliente digita el total exacto.</p></div></div><div class="step"><div class="step-num">04</div><div class="step-body"><h3>El monitor escucha la cadena</h3><p>WebSocket a Solana más reconciliación cada 2 s. Valida mint, monto y reference antes de dar el pago por bueno.</p></div></div><div class="step"><div class="step-num">05</div><div class="step-body"><h3>El MCU dispensa</h3><p>Un pulso de 2,5 s en D7 a través de arduino-router. Cada bebida se despacha en orden, con LEDs de estado.</p></div></div><div class="step"><div class="step-num">06</div><div class="step-body"><h3>La orden se cierra</h3><p>Estado dispensada, carrito limpio y feedback en pantalla. La venta queda registrada para auditoría.</p></div></div></div>
 </div>
 </section>
+
+<section class="section tight rec-section" id="video" style="--accent:#2E7DFF;--accent2:#14F195">
+<div class="wrap">
+<div class="rec-kicker">REC · VIDEO · 3:17</div>
+<h2 class="rec-h2">Vending Solana · cobrar en USDC y abrir la lata</h2>
+<p class="rec-lead">Recorrido por la máquina expendedora de la UNO Q: creación de orden con total recalculado, QR de Solana Pay sin monto, validación de la transferencia SPL, monitoreo por WebSocket, emparejamiento de pagos y pulso de relé con fail-safe.</p>
+<div class="rec-banner">
+<span class="rec-banner-icon">📋</span>
+<strong>Puedes copiar y pegar los comandos del video desde el video !!!</strong>
+<span>Pausá, seleccioná el texto de la terminal y copiá.</span>
+</div>
+<div class="rec-shell">
+<div class="rec-bar"><i></i><i></i><i></i><span class="rec-title">Vending Solana · cobrar en USDC y abrir la lata · asciinema</span><span class="rec-rec"><b></b>REC</span></div>
+<div class="rec-screen-wrap">
+<div class="rec-screen" id="rec-screen"></div>
+<div class="rec-poster" id="rec-poster">
+<div class="rec-kicker">ASCIINEMA · 3:17</div>
+<h3>Vending Solana · cobrar en USDC y abrir la lata</h3>
+<p>Recorrido por la máquina expendedora de la UNO Q: creación de orden con total recalculado, QR de Solana Pay sin monto, validación de la transferencia SPL, monitoreo por WebSocket, emparejamiento de pagos y pulso de relé con fail-safe.</p>
+<div class="rec-poster-meta">vending-solana-unoq · código real</div>
+<button class="rec-btn rec-primary" id="rec-start" type="button">▶ Reproducir</button>
+</div>
+</div>
+<div class="rec-controls">
+<button class="rec-btn rec-primary" id="rec-play" type="button">▶ Reproducir</button>
+<button class="rec-btn" id="rec-restart" type="button">↺ Reiniciar</button>
+<input class="rec-progress" id="rec-range" type="range" min="0" max="1000" value="0" aria-label="Progreso"/>
+<span class="rec-time" id="rec-time">0:00 / 3:17</span>
+<select class="rec-speed" id="rec-speed" aria-label="Velocidad"><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+<button class="rec-btn" id="rec-full" type="button" title="Pantalla completa">⛶</button>
+<button class="rec-btn" id="rec-copy" type="button">⧉ Copiar comandos</button>
+<a class="rec-download" href="rec/vending-solana-unoq.cast" download>descargar .cast</a>
+</div>
+</div>
+<p class="rec-note">Video generado a partir del código real del repositorio. Los fragmentos corresponden a los archivos y líneas indicados. No se muestran claves privadas, tokens, direcciones personales ni el contenido de config.yaml o .env.</p>
+<div class="rec-chapters"><span class="rec-chip"><b>0:06</b> EL PROBLEMA</span><span class="rec-chip"><b>0:22</b> ARQUITECTURA</span><span class="rec-chip"><b>0:35</b> LA ORDEN</span><span class="rec-chip"><b>0:50</b> EL QR</span><span class="rec-chip"><b>1:05</b> SOLANA PAY</span><span class="rec-chip"><b>1:19</b> SEGURIDAD</span><span class="rec-chip"><b>1:36</b> EL MONITOR</span><span class="rec-chip"><b>1:52</b> EMPAREJAR</span><span class="rec-chip"><b>2:08</b> EL RELÉ</span><span class="rec-chip"><b>2:24</b> FAIL-SAFE</span><span class="rec-chip"><b>2:38</b> HARDWARE</span><span class="rec-chip"><b>2:54</b> CÓMO EJECUTARLO</span></div>
+</div>
+</section>
+
 <section class="section tight" id="arquitectura">
 <div class="wrap">
 <div class="section-head reveal">
@@ -477,5 +518,7 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 </script>
 <script>window.PORTFOLIO_COMMUNITY = {"account": "wanderc137", "repo": "vending-solana-unoq", "coinNamespace": "wanderc137-vending-solana-unoq-coins-v2", "faqs": [{"q": "¿Qué hace exactamente este proyecto?", "a": "Es una máquina expendedora que cobra <b>USDC en Solana</b>. El cliente escanea un QR de Solana Pay, el backend detecta la transferencia y el MCU de la Arduino UNO Q activa un relé en <code>D7</code> durante 2,5 s para dispensar el producto."}, {"q": "¿Dónde está la clave privada de la billetera?", "a": "No está en la placa. El sistema solo necesita la <b>dirección pública</b> del comercio para construir el Transfer Request. La clave privada nunca se carga en el repositorio ni en el dispositivo; el modelo de confianza está explicado en <code>docs/datasheet.md</code>."}, {"q": "¿Funciona en mainnet o solo en devnet?", "a": "Está probado con <b>pagos reales en mainnet-beta</b>: tres pagos validados. El E2E en devnet no se ejecutó porque la unidad tuvo un fallo de hardware en el WiFi y el faucet estaba agotado. El README declara esa parte incómoda en lugar de taparla."}, {"q": "¿Qué pasa si se cae internet o el RPC?", "a": "Sin red no se pueden confirmar pagos. El servicio sigue activo y el relé <b>no se dispara</b> por una orden no confirmada. La unidad de prueba tuvo el WiFi en RMA; por eso el proyecto separa la lógica de pago de la de dispensado y documenta el riesgo residual."}, {"q": "¿Cómo se conecta el relé?", "a": "El relé va al pin <code>D7</code> del header de la UNO Q y lo gobierna el <b>MCU STM32U585</b>, no Linux. El Linux habla con el MCU por <code>arduino-router</code> en <code>127.0.0.1:7500</code>; el pulso se ejecuta en el MCU para evitar jitter."}, {"q": "¿Puedo cambiar productos y precios?", "a": "Sí. El catálogo vive en <code>catalog.yaml</code> y cada producto tiene id, nombre, precio y tiempo de pulso. La interfaz y el backend leen ese archivo; no hay que recompilar el firmware para cambiar el catálogo."}, {"q": "¿Por qué Arduino UNO Q y no una Raspberry Pi?", "a": "Porque separa Linux y MCU: el MPU corre FastAPI y el monitor de pagos; el STM32U585 ejecuta el pulso del relé con timing determinista. Una Raspberry Pi sola puede hacerlo, pero el aislamiento y el control de tiempo son mejores con un MCU dedicado."}, {"q": "¿Cómo se prueba sin armar la máquina?", "a": "Hay un modo simulado que crea una orden, simula el pago y ejecuta el pulso real en <code>D7</code>. También se puede usar el catálogo y la UI sin conectar la billetera; el README explica qué queda cubierto y qué no."}, {"q": "¿Cómo colaboro o reporto un problema?", "a": "Abrí un issue en el repositorio con el contexto mínimo para reproducirlo. Si encontrás un fallo de seguridad, evitá publicar credenciales o datos sensibles en el hilo."}]};</script>
 <script defer="" src="assets/community.js?v=6"></script>
+<script defer src="rec/vending-solana-unoq.cast.js?v=1"></script>
+<script defer src="rec/player.js?v=1"></script>
 </body>
 </html>
